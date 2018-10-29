@@ -87,6 +87,7 @@ def maybe_convert_to_tfrecords():
         img = img.astype(np.float32)
         img = np.multiply(img, 1.0 / 255.0)
 
+
         label = label_dict[dxs[i]]
 
         # Create a feature
@@ -136,7 +137,12 @@ def parse_fn(serialized):
 
     # The image and label are now correct TensorFlow types.
 
-    #TODO: implement image augmentation here!!
+    # Image processing for training the network. Note the many random
+    # distortions applied to the image.
+
+    # Randomly flip the image horizontally and vertically.
+    #image = tf.image.random_flip_left_right(image)
+    #image = tf.image.random_flip_up_down(image)
 
     return image, label
 
@@ -192,7 +198,7 @@ def train_input_fn(batch_size=hyperparams.FLAGS.train_batch_size, buffer_size=10
     return x, y
 
 
-def eval_input_fn(batch_size=1):
+def eval_input_fn(batch_size=hyperparams.FLAGS.validation_batch_size, buffer_size=100000):
     # Args:
     # filenames:   Filenames for the TFRecords files.
     # train:       Boolean whether training (True) or testing (False).
@@ -206,6 +212,8 @@ def eval_input_fn(batch_size=1):
     # for reading and shuffling data from TFRecords files.
     dataset = tf.data.TFRecordDataset(filenames=tfrecords_filename)
 
+    dataset = dataset.shuffle(buffer_size=buffer_size)
+
     # Parse the serialized data in the TFRecords files.
     # This returns TensorFlow tensors for the image and labels.
 
@@ -213,7 +221,7 @@ def eval_input_fn(batch_size=1):
 
     # If testing then don't shuffle the data.
     # Only go through the data once.
-    num_repeat = 1
+    num_repeat = None
 
     # Repeat the dataset the given number of times.
     dataset = dataset.repeat(num_repeat)
@@ -224,7 +232,7 @@ def eval_input_fn(batch_size=1):
     # Maximum number of elements that will be buffered
     # prefetch(n) (where n is the number of elements / batches consumed by a training step)
 
-    prefetch_buffer_size = 1
+    prefetch_buffer_size = 100
 
     dataset = dataset.prefetch(buffer_size=prefetch_buffer_size)
 

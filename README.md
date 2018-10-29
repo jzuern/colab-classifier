@@ -3,19 +3,14 @@
 
 # Architecture
 
-Based on ResNet-50 architecture
+Based on ResNet-50 architecture by Wenxin Xu (https://github.com/wenxinxu/resnet_in_tensorflow)
 
 
 # Results
 
 # TODO
 
-- implement data augmentation
-	Sample-wise standardization.
-	Feature-wise standardization.
-	ZCA whitening.
-	Random rotation, shifts, shear and flips.
-
 - change hyperparameter config to json format
 - clone code from github
+- different activation functions
 - Debug confusion matrix

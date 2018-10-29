@@ -133,10 +133,12 @@ def model_fn(features, labels, mode):
     # Calculate Loss (for both TRAIN and EVAL modes)
     loss = tf.losses.sparse_softmax_cross_entropy(labels=labels, logits=logits)
 
+
+
     # Configure the Training Op (for TRAIN mode)
     if mode == tf.estimator.ModeKeys.TRAIN:
 
-        optimizer = tf.train.AdamOptimizer(learning_rate=hyperparams.FLAGS.learning_rate)
+        optimizer = tf.train.RMSPropOptimizer(learning_rate=hyperparams.FLAGS.learning_rate)
 
         train_op = optimizer.minimize(
             loss=loss,
@@ -145,6 +147,7 @@ def model_fn(features, labels, mode):
         tf.summary.scalar(name='training/loss', tensor=tf.squeeze(loss))
 
         accuracy = tf.metrics.accuracy(labels=labels, predictions=predictions["classes"])
+        
         tf.summary.scalar(name='training/accuracy', tensor=accuracy[1])
 
         tf.summary.scalar(name='training/gt_labels', tensor=labels[0])
@@ -152,6 +155,7 @@ def model_fn(features, labels, mode):
         tf.summary.image(name='training/images', tensor=x, max_outputs=1)
 
         annotated_images = tf_put_text(x, labels, predicted_labels)
+        
         tf.summary.image('training/annotated_images',
                          annotated_images,
                          max_outputs=1)
@@ -164,10 +168,11 @@ def model_fn(features, labels, mode):
             output_dir=hyperparams.FLAGS.ckpt_path,
             summary_op=tf.summary.merge_all())
 
-        return tf.estimator.EstimatorSpec(mode=mode,
-                                          loss=loss,
-                                          train_op=train_op,
-                                          training_hooks=[training_summary_hook])
+        return tf.estimator.EstimatorSpec(
+            mode=mode,
+            loss=loss,
+            train_op=train_op,
+            training_hooks=[training_summary_hook])
 
     if mode == tf.estimator.ModeKeys.EVAL:
         # Add evaluation metrics (for EVAL mode)
@@ -192,9 +197,6 @@ def model_fn(features, labels, mode):
                          max_outputs=1)
 
         
-
-
-
         eval_summary_hook = tf.train.SummarySaverHook(
             save_steps=10,
             output_dir=hyperparams.FLAGS.ckpt_path,

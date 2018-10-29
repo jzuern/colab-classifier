@@ -23,19 +23,16 @@ def main(unused_argv):
         model_dir=hyperparams.FLAGS.ckpt_path)
 
     # define training and evaluation specs
-    train_spec = tf.estimator.TrainSpec(input_fn=train_input_fn, max_steps=hyperparams.FLAGS.train_steps)
+    train_spec = tf.estimator.TrainSpec(
+        input_fn=train_input_fn, 
+        max_steps=hyperparams.FLAGS.train_steps)
+
     eval_spec = tf.estimator.EvalSpec(input_fn=eval_input_fn)
 
     # train and evaluate estimator using these specs
     tf.estimator.train_and_evaluate(cancer_classifier, train_spec, eval_spec)
 
-    # Evaluate the model and print results
-    #eval_results = mnist_classifier.evaluate(
-    #    input_fn=eval_input_fn,
-    ##    steps=hyperparams.FLAGS.eval_steps
-    #)
 
-    #print(eval_results)
 
 
 if __name__ == "__main__":

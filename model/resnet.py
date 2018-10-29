@@ -8,10 +8,6 @@ import numpy as np
 import tensorflow as tf
 from model.hyper_parameters import *
 
-
-BN_EPSILON = 0.001
-
-
 def create_variables(name, shape, initializer=tf.contrib.layers.xavier_initializer(), is_fc_layer=False):
     '''
     :param name: A string. The name of the new variable
@@ -76,7 +72,8 @@ def conv_bn_relu_layer(input_layer, filter_shape, stride):
     conv_layer = tf.nn.conv2d(input_layer, filter, strides=[1, stride, stride, 1], padding='SAME')
     bn_layer = batch_normalization_layer(conv_layer, out_channel)
 
-    output = tf.nn.relu(bn_layer)
+    #output = tf.nn.relu(bn_layer)
+    output = tf.nn.elu(bn_layer)
     return output
 
 

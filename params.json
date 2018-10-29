@@ -3,22 +3,23 @@
     "architecture": {
         "learning_rate": 0.0001,
         "num_residual_blocks": 5,
-        "weight_decay": 0.0002
+        "weight_decay": 0.0002,
+        "activation_function": "relu",  // Resolution of images in x and y dimensions
+        "image_resolution": 64,
+        "BN_EPSILON": 0.001
     },
     "training": {
         "train_steps": 10000,
-        "train_batch_size": 16,
-        "validation_batch_size": 16,
-        "test_batch_size": 16
+        "train_batch_size": 32,
+        "validation_batch_size": 32,
+        "test_batch_size": 32
     },
     "data_augmentation": {
-        "padding_size": 2
+        "weight_decay": 2,
+        "use_checkpoint": false
+    },
+    "paths": {
+        "data_dir": "/content/dataset_skin/",
+        "ckpt_path": "/content/drive/classifier/checkpoints"
     }
-    //"other": {
-    //    "xx": 4
-    //}
-    //"paths": {
-    //    "data_dir": "/content/dataset_skin/",
-    //    "ckpt_path": "/content/drive/classifier/checkpoints"
-    //},
 }
