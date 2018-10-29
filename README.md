@@ -10,7 +10,6 @@ Based on ResNet-50 architecture by Wenxin Xu (https://github.com/wenxinxu/resnet
 
 # TODO
 
-- change hyperparameter config to json format
 - clone code from github
 - different activation functions
 - Debug confusion matrix

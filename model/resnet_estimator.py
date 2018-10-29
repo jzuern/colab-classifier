@@ -1,6 +1,8 @@
 import tensorflow as tf
 import model.resnet as resnet
-import model.hyper_parameters as hyperparams
+#import model.hyper_parameters as hyperparams
+from model.hyper_parameters import params
+
 import cv2
 import numpy as np
 from textwrap import wrap
@@ -106,8 +108,10 @@ def tf_put_text(imgs, gt_label, pred_label):
 
 def model_fn(features, labels, mode):
 
-    n_res_blocks = hyperparams.FLAGS.num_residual_blocks
-    img_res = hyperparams.FLAGS.image_resolution
+    #n_res_blocks = hyperparams.FLAGS.num_residual_blocks
+    n_res_blocks = params["architecture"]["num_residual_blocks"]
+    #img_res = hyperparams.FLAGS.image_resolution
+    img_res = root = params["architecture"]["image_resolution"]
 
     x = features['image']
     x = tf.reshape(x, [-1, img_res, img_res, 3])
@@ -138,7 +142,7 @@ def model_fn(features, labels, mode):
     # Configure the Training Op (for TRAIN mode)
     if mode == tf.estimator.ModeKeys.TRAIN:
 
-        optimizer = tf.train.RMSPropOptimizer(learning_rate=hyperparams.FLAGS.learning_rate)
+        optimizer = tf.train.RMSPropOptimizer(learning_rate=params["training"]["learning_rate"])
 
         train_op = optimizer.minimize(
             loss=loss,
@@ -165,7 +169,7 @@ def model_fn(features, labels, mode):
 
         training_summary_hook = tf.train.SummarySaverHook(
             save_steps=10,
-            output_dir=hyperparams.FLAGS.ckpt_path,
+            output_dir=params["paths"]["ckpt_path"],
             summary_op=tf.summary.merge_all())
 
         return tf.estimator.EstimatorSpec(
@@ -199,7 +203,7 @@ def model_fn(features, labels, mode):
         
         eval_summary_hook = tf.train.SummarySaverHook(
             save_steps=10,
-            output_dir=hyperparams.FLAGS.ckpt_path,
+            output_dir=params["paths"]["ckpt_path"],
             summary_op=tf.summary.merge_all())
 
 

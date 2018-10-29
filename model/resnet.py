@@ -6,7 +6,13 @@ This is the resnet structure
 
 import numpy as np
 import tensorflow as tf
-from model.hyper_parameters import *
+#from model.hyper_parameters import *
+from model.hyper_parameters import params
+
+
+def activation(activation_function):
+    # TODO: implement
+    return 0
 
 def create_variables(name, shape, initializer=tf.contrib.layers.xavier_initializer(), is_fc_layer=False):
     '''
@@ -18,7 +24,7 @@ def create_variables(name, shape, initializer=tf.contrib.layers.xavier_initializ
     :return: The created variable
     '''
 
-    regularizer = tf.contrib.layers.l2_regularizer(scale=FLAGS.weight_decay)
+    regularizer = tf.contrib.layers.l2_regularizer(scale=params["architecture"]["weight_decay"])
 
     new_variables = tf.get_variable(name, shape=shape, initializer=initializer,
                                     regularizer=regularizer)
@@ -52,7 +58,8 @@ def batch_normalization_layer(input_layer, dimension):
                            initializer=tf.constant_initializer(0.0, tf.float32))
     gamma = tf.get_variable('gamma', dimension, tf.float32,
                             initializer=tf.constant_initializer(1.0, tf.float32))
-    bn_layer = tf.nn.batch_normalization(input_layer, mean, variance, beta, gamma, BN_EPSILON)
+    bn_layer = tf.nn.batch_normalization(input_layer, mean, variance, beta, gamma, 
+        params["architecture"]["batch_normalization_epsilon"])
 
     return bn_layer
 
@@ -182,7 +189,7 @@ def inference(input_tensor_batch, n, reuse):
 
         assert global_pool.get_shape().as_list()[-1:] == [64]
 
-        n_classes = 7
+        n_classes = params["architecture"]["n_output_classes"]
 
         output = output_layer(global_pool, n_classes)
         layers.append(output)

@@ -1,15 +1,16 @@
 
 {
     "architecture": {
-        "learning_rate": 0.0001,
         "num_residual_blocks": 5,
         "weight_decay": 0.0002,
-        "activation_function": "relu",  // Resolution of images in x and y dimensions
+        "activation_function": "relu",
         "image_resolution": 64,
-        "BN_EPSILON": 0.001
+        "batch_normalization_epsilon": 0.001,
+        "n_output_classes": 7
     },
     "training": {
         "train_steps": 10000,
+        "learning_rate": 0.0001,
         "train_batch_size": 32,
         "validation_batch_size": 32,
         "test_batch_size": 32

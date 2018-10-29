@@ -4,8 +4,8 @@ import tensorflow as tf
 import sys
 from PIL import Image
 import numpy as np
-import model.hyper_parameters as hyperparams
-
+# import model.hyper_parameters as hyperparams
+from model.hyper_parameters import params
 
 def _int64_feature(value):
     return tf.train.Feature(int64_list=tf.train.Int64List(value=[value]))
@@ -18,17 +18,17 @@ def _bytes_feature(value):
 def maybe_convert_to_tfrecords():
 
 
-    root = hyperparams.FLAGS.data_dir
+    # root = hyperparams.FLAGS.data_dir
+    root = params["paths"]["data_dir"]
 
-    # Test if tfrecords files already exist
     train_filename = root + 'train.tfrecords'
     eval_filename = root + 'eval.tfrecords'
+    csv_file = root + 'HAM10000_metadata.csv'
 
+    # Test if tfrecords files already exist
     if os.path.isfile(train_filename) and os.path.isfile(eval_filename):
         print("Training and Evaluation tfrecord files already exist!")
         return
-
-    # if tfrecords files don't exist:
 
     label_dict = {"bkl": 0,
                   "nv": 1,
@@ -38,7 +38,6 @@ def maybe_convert_to_tfrecords():
                   "vasc": 5,
                   "df": 6}
 
-    csv_file = root + 'HAM10000_metadata.csv'
 
     lesion_ids = []
     image_paths = []
@@ -80,8 +79,11 @@ def maybe_convert_to_tfrecords():
         w = 600
         h = 450
 
+        res = params["architecture"]["image_resolution"]
+
         pil_img = pil_img.crop((75, 0, w-75, h))
-        pil_img = pil_img.resize([hyperparams.FLAGS.image_resolution, hyperparams.FLAGS.image_resolution])
+        # pil_img = pil_img.resize([hyperparams.FLAGS.image_resolution, hyperparams.FLAGS.image_resolution])
+        pil_img = pil_img.resize([res, res])
 
         img = np.asarray(pil_img, dtype=np.uint8)
         img = img.astype(np.float32)
@@ -130,7 +132,9 @@ def parse_fn(serialized):
     # Decode the raw bytes so it becomes a tensor with type.
     image = tf.decode_raw(image_raw, tf.float32)
 
-    image = tf.reshape(image, [hyperparams.FLAGS.image_resolution, hyperparams.FLAGS.image_resolution, 3])
+    res = params["architecture"]["image_resolution"]
+    # image = tf.reshape(image, [hyperparams.FLAGS.image_resolution, hyperparams.FLAGS.image_resolution, 3])
+    image = tf.reshape(image, [res, res, 3])
 
     # Get the label associated with the image.
     label = parsed_example['label']
@@ -146,8 +150,8 @@ def parse_fn(serialized):
 
     return image, label
 
-
-def train_input_fn(batch_size=hyperparams.FLAGS.train_batch_size, buffer_size=100000):
+def train_input_fn(batch_size=params["training"]["train_batch_size"], buffer_size=100000):
+#def train_input_fn(batch_size=hyperparams.FLAGS.train_batch_size, buffer_size=100000):
     # Args:
     # filenames:   Filenames for the TFRecords files.
     # train:       Boolean whether training (True) or testing (False).
@@ -155,7 +159,7 @@ def train_input_fn(batch_size=hyperparams.FLAGS.train_batch_size, buffer_size=10
     # buffer_size: Read buffers of this size. The random shuffling
     #              is done on the buffer, so it must be big enough.
 
-    tfrecords_filename = hyperparams.FLAGS.data_dir + 'train.tfrecords'
+    tfrecords_filename = params["paths"]["data_dir"] + 'train.tfrecords'
 
     # Create a TensorFlow Dataset-object which has functionality
     # for reading and shuffling data from TFRecords files.
@@ -198,7 +202,7 @@ def train_input_fn(batch_size=hyperparams.FLAGS.train_batch_size, buffer_size=10
     return x, y
 
 
-def eval_input_fn(batch_size=hyperparams.FLAGS.validation_batch_size, buffer_size=100000):
+def eval_input_fn(batch_size=params["training"]["validation_batch_size"], buffer_size=100000):
     # Args:
     # filenames:   Filenames for the TFRecords files.
     # train:       Boolean whether training (True) or testing (False).
@@ -206,7 +210,7 @@ def eval_input_fn(batch_size=hyperparams.FLAGS.validation_batch_size, buffer_siz
     # buffer_size: Read buffers of this size. The random shuffling
     #              is done on the buffer, so it must be big enough.
 
-    tfrecords_filename = hyperparams.FLAGS.data_dir + 'eval.tfrecords'
+    tfrecords_filename = params["paths"]["data_dir"] + 'eval.tfrecords'
 
     # Create a TensorFlow Dataset-object which has functionality
     # for reading and shuffling data from TFRecords files.
