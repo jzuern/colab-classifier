@@ -4,8 +4,8 @@ import tensorflow as tf
 import sys
 from PIL import Image
 import numpy as np
-# import model.hyper_parameters as hyperparams
 from model.hyper_parameters import params
+from random import shuffle
 
 def _int64_feature(value):
     return tf.train.Feature(int64_list=tf.train.Int64List(value=[value]))
@@ -17,8 +17,6 @@ def _bytes_feature(value):
 
 def maybe_convert_to_tfrecords():
 
-
-    # root = hyperparams.FLAGS.data_dir
     root = params["paths"]["data_dir"]
 
     train_filename = root + 'train.tfrecords'
@@ -60,12 +58,16 @@ def maybe_convert_to_tfrecords():
     train_writer = tf.python_io.TFRecordWriter(train_filename)
     eval_writer = tf.python_io.TFRecordWriter(eval_filename)
 
-    max_samples = len(image_paths)
 
-    for i in range(max_samples):
+    n_samples = len(image_paths)
+    images = []
+    labels = []
+
+
+    for i in range(n_samples):
 
         if not i % 100:
-            print('Serializing sample {}/{}'.format(i, max_samples))
+            print('Serializing sample {}/{}'.format(i, n_samples))
             sys.stdout.flush()
 
         # Load the image
@@ -74,7 +76,6 @@ def maybe_convert_to_tfrecords():
         except:
             continue
 
-
         # image resolution: 600 x 450
         w = 600
         h = 450
@@ -82,31 +83,85 @@ def maybe_convert_to_tfrecords():
         res = params["architecture"]["image_resolution"]
 
         pil_img = pil_img.crop((75, 0, w-75, h))
-        # pil_img = pil_img.resize([hyperparams.FLAGS.image_resolution, hyperparams.FLAGS.image_resolution])
         pil_img = pil_img.resize([res, res])
 
         img = np.asarray(pil_img, dtype=np.uint8)
         img = img.astype(np.float32)
         img = np.multiply(img, 1.0 / 255.0)
 
-
         label = label_dict[dxs[i]]
+
+        labels.append(label)
+        images.append(img)
+
+    combined = list(zip(images, labels))
+
+    # random shuffle images and labels
+    shuffle(combined)
+
+    # separate
+    images, labels = zip(*combined)
+
+    # split into train and validation set
+    training_fraction = 0.8
+    training_size = int(round(training_fraction*len(images)))
+
+    # training
+    train_images = images[:training_size] 
+    train_labels = labels[:training_size] 
+
+    # evaluation
+    validation_images = images[training_size:] 
+    validation_labels = labels[training_size:] 
+
+    assert(len(validation_images) == len(validation_labels))
+    assert(len(train_images) == len(train_labels))
+
+    len_training_examples = len(train_labels)
+    len_validation_examples = len(validation_labels)
+
+    print("Training set has {} samples.".format(len_training_examples))
+    print("Validation set has {} samples.".format(len_validation_examples))
+
+    # create bins for determining the class distribution in the datasets
+    training_class_counter = [0]*params["architecture"]["n_output_classes"]
+    val_class_counter = [0]*params["architecture"]["n_output_classes"]
+
+    
+    for image, label in zip(validation_images, validation_labels):
+
+        val_class_counter[label] += 1
 
         # Create a feature
         feature = {'label': _int64_feature(label),
-                   'image': _bytes_feature(img.tostring())}
+                   'image': _bytes_feature(image.tostring())}
 
-        # Create an example protocol buffer
-        example = tf.train.Example(features=tf.train.Features(feature=feature))
+        sample = tf.train.Example(features=tf.train.Features(feature=feature))
 
-        # Serialize to string and write on the file
-        if i % 5 == 0:
-            eval_writer.write(example.SerializeToString())
-        else:
-            train_writer.write(example.SerializeToString())
+        eval_writer.write(sample.SerializeToString())
+
+    for image, label in zip(train_images, train_labels):
+
+        training_class_counter[label] += 1
+
+        # Create a feature
+        feature = {'label': _int64_feature(label),
+                   'image': _bytes_feature(image.tostring())}
+
+        sample = tf.train.Example(features=tf.train.Features(feature=feature))
+
+        train_writer.write(sample.SerializeToString())
+
 
     train_writer.close()
     eval_writer.close()
+
+    print("Distribution of classes in Training set:")
+    print(training_class_counter)
+
+    print("Distribution of classes in Evaluation set:")
+    print(val_class_counter)
+
 
     sys.stdout.flush()
 
@@ -133,16 +188,12 @@ def parse_fn(serialized):
     image = tf.decode_raw(image_raw, tf.float32)
 
     res = params["architecture"]["image_resolution"]
-    # image = tf.reshape(image, [hyperparams.FLAGS.image_resolution, hyperparams.FLAGS.image_resolution, 3])
     image = tf.reshape(image, [res, res, 3])
 
     # Get the label associated with the image.
     label = parsed_example['label']
 
     # The image and label are now correct TensorFlow types.
-
-    # Image processing for training the network. Note the many random
-    # distortions applied to the image.
 
     # Randomly flip the image horizontally and vertically.
     #image = tf.image.random_flip_left_right(image)
@@ -236,7 +287,7 @@ def eval_input_fn(batch_size=params["training"]["validation_batch_size"], buffer
     # Maximum number of elements that will be buffered
     # prefetch(n) (where n is the number of elements / batches consumed by a training step)
 
-    prefetch_buffer_size = 100
+    prefetch_buffer_size = 10
 
     dataset = dataset.prefetch(buffer_size=prefetch_buffer_size)
 

@@ -1,15 +1,15 @@
 
 {
     "architecture": {
-        "num_residual_blocks": 5,
+        "num_residual_blocks": 2,
         "weight_decay": 0.0002,
-        "activation_function": "relu",
+        "nonlinearity": "relu",
         "image_resolution": 64,
         "batch_normalization_epsilon": 0.001,
         "n_output_classes": 7
     },
     "training": {
-        "train_steps": 10000,
+        "train_steps": 100000,
         "learning_rate": 0.0001,
         "train_batch_size": 32,
         "validation_batch_size": 32,

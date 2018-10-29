@@ -27,7 +27,9 @@ def main(unused_argv):
         input_fn=train_input_fn, 
         max_steps=params["training"]["train_steps"])
 
-    eval_spec = tf.estimator.EvalSpec(input_fn=eval_input_fn)
+    eval_spec = tf.estimator.EvalSpec(
+        input_fn=eval_input_fn,
+        throttle_secs=100)
 
     # train and evaluate estimator using these specs
     tf.estimator.train_and_evaluate(cancer_classifier, train_spec, eval_spec)

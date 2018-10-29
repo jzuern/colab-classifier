@@ -3,16 +3,22 @@
 This is the resnet structure
 '''
 
-
 import numpy as np
 import tensorflow as tf
-#from model.hyper_parameters import *
 from model.hyper_parameters import params
 
 
-def activation(activation_function):
-    # TODO: implement
-    return 0
+def set_nonlinearity(name):
+    if name == 'relu':
+        return tf.nn.relu
+    elif name == 'elu':
+        return tf.nn.elu
+    elif name == 'leaky_relu':
+        return tf.nn.leaky_relu
+    else:
+        raise('nonlinearity ' + name + ' is not supported')
+
+
 
 def create_variables(name, shape, initializer=tf.contrib.layers.xavier_initializer(), is_fc_layer=False):
     '''
@@ -79,12 +85,12 @@ def conv_bn_relu_layer(input_layer, filter_shape, stride):
     conv_layer = tf.nn.conv2d(input_layer, filter, strides=[1, stride, stride, 1], padding='SAME')
     bn_layer = batch_normalization_layer(conv_layer, out_channel)
 
-    #output = tf.nn.relu(bn_layer)
-    output = tf.nn.elu(bn_layer)
+    output = tf.nn.relu(bn_layer)
+
     return output
 
 
-def bn_relu_conv_layer(input_layer, filter_shape, stride):
+def bn_relu_conv_layer(input_layer, filter_shape, stride, nonlinearity_name='relu'):
     '''
     A helper function to batch normalize, relu and conv the input layer sequentially
     :param input_layer: 4D tensor
@@ -93,13 +99,18 @@ def bn_relu_conv_layer(input_layer, filter_shape, stride):
     :return: 4D tensor. Y = conv(Relu(batch_normalize(X)))
     '''
 
+    #nonlinearity = set_nonlinearity(nonlinearity_name)
+
+
     in_channel = input_layer.get_shape().as_list()[-1]
 
     bn_layer = batch_normalization_layer(input_layer, in_channel)
-    relu_layer = tf.nn.relu(bn_layer)
+    
+    #nonlinearity_layer = nonlinearity(bn_layer)
+    nonlinearity_layer = tf.nn.relu(bn_layer)
 
     filter = create_variables(name='conv', shape=filter_shape)
-    conv_layer = tf.nn.conv2d(relu_layer, filter, strides=[1, stride, stride, 1], padding='SAME')
+    conv_layer = tf.nn.conv2d(nonlinearity_layer, filter, strides=[1, stride, stride, 1], padding='SAME')
     return conv_layer
 
 
@@ -158,6 +169,8 @@ def inference(input_tensor_batch, n, reuse):
     :return: last layer in the network. Not softmax-ed
     '''
 
+    nonlinearity = set_nonlinearity(params["architecture"]["nonlinearity"])
+
     layers = []
     with tf.variable_scope('conv0', reuse=reuse):
         conv0 = conv_bn_relu_layer(input_tensor_batch, [3, 3, 3, 16], 1)
@@ -184,8 +197,12 @@ def inference(input_tensor_batch, n, reuse):
     with tf.variable_scope('fc', reuse=reuse):
         in_channel = layers[-1].get_shape().as_list()[-1]
         bn_layer = batch_normalization_layer(layers[-1], in_channel)
-        relu_layer = tf.nn.relu(bn_layer)
-        global_pool = tf.reduce_mean(relu_layer, [1, 2])
+        
+
+        nonlinearity_layer = tf.nn.relu(bn_layer)
+        #nonlinearity_layer = nonlinearity(bn_layer)
+
+        global_pool = tf.reduce_mean(nonlinearity_layer, [1, 2])
 
         assert global_pool.get_shape().as_list()[-1:] == [64]
 

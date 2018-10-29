@@ -1,8 +1,6 @@
 import tensorflow as tf
 import model.resnet as resnet
-#import model.hyper_parameters as hyperparams
 from model.hyper_parameters import params
-
 import cv2
 import numpy as np
 from textwrap import wrap
@@ -120,7 +118,7 @@ def model_fn(features, labels, mode):
 
     predicted_labels = tf.argmax(input=logits, axis=1)
 
-    labels_names = ["bkl", "nv" ,"mel", "bcc","akiec","vasc","df" ]
+    labels_names = ["bkl", "nv", "mel", "bcc", "akiec", "vasc", "df"]
 
 
     predictions = {
@@ -136,7 +134,6 @@ def model_fn(features, labels, mode):
 
     # Calculate Loss (for both TRAIN and EVAL modes)
     loss = tf.losses.sparse_softmax_cross_entropy(labels=labels, logits=logits)
-
 
 
     # Configure the Training Op (for TRAIN mode)
@@ -179,10 +176,12 @@ def model_fn(features, labels, mode):
             training_hooks=[training_summary_hook])
 
     if mode == tf.estimator.ModeKeys.EVAL:
+
         # Add evaluation metrics (for EVAL mode)
         eval_metric_ops = {
             "accuracy": tf.metrics.accuracy(
                 labels=labels, predictions=predictions["classes"])}
+
 
         tf.summary.scalar(name='eval/loss', tensor=tf.squeeze(loss))
 
@@ -206,12 +205,10 @@ def model_fn(features, labels, mode):
             output_dir=params["paths"]["ckpt_path"],
             summary_op=tf.summary.merge_all())
 
-
         return tf.estimator.EstimatorSpec(
             mode=mode,
             loss=loss,
             eval_metric_ops=eval_metric_ops,
             evaluation_hooks=[eval_summary_hook])
 
-    else:
-        raise ValueError
+    raise ValueError
