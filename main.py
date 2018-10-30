@@ -5,7 +5,7 @@ from __future__ import print_function
 
 import tensorflow as tf
 from model.resnet_estimator import model_fn
-from data.dataset_skin_cancer import train_input_fn, eval_input_fn, predict_input_fn, maybe_convert_to_tfrecords
+from data.cifar_dataset import train_input_fn, eval_input_fn, predict_input_fn, maybe_convert_to_tfrecords
 from model.hyper_parameters import params
 
 tf.logging.set_verbosity(tf.logging.DEBUG)

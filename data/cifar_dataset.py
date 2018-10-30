@@ -21,43 +21,44 @@ def maybe_convert_to_tfrecords():
 
     train_filename = root + 'train.tfrecords'
     eval_filename = root + 'eval.tfrecords'
-    csv_file = root + 'HAM10000_metadata.csv'
+    csv_file = root + 'trainLabels.csv'
 
     # Test if tfrecords files already exist
     if os.path.isfile(train_filename) and os.path.isfile(eval_filename):
         print("Training and Evaluation tfrecord files already exist!")
         return
 
-    label_dict = {"bkl": 0,
-                  "nv": 1,
-                  "mel": 2,
-                  "bcc": 3,
-                  "akiec": 4,
-                  "vasc": 5,
-                  "df": 6}
+
+    label_dict = {"airplane": 0,
+                  "automobile": 1,
+                  "bird": 2,
+                  "cat": 3,
+                  "deer": 4,
+                  "dog": 5,
+                  "frog": 6,
+                  "horse": 7,
+                  "ship": 8,
+                  "truck": 9}
 
 
-    lesion_ids = []
     image_paths = []
-    dxs = []
+    gt_labels = []
 
     with open(csv_file, 'r') as csvfile:
         reader = csv.reader(csvfile, delimiter=',')
         for row in reader:
 
-            lesion_ids.append(row[0])
+            gt_labels.append(row[0])
 
             image_id = row[1]
             image_path = root + 'images/' + image_id + '.jpg'
 
             image_paths.append(image_path)
-            dxs.append(row[2])
 
 
     # open the TFRecords file
     train_writer = tf.python_io.TFRecordWriter(train_filename)
     eval_writer = tf.python_io.TFRecordWriter(eval_filename)
-
 
     n_samples = len(image_paths)
     images = []
