@@ -20,7 +20,7 @@
         "use_checkpoint": false 
     },
     "paths": {
-        "data_dir": "/content/cifar-10-data/",
+        "data_dir": "/content/",
         "ckpt_path": "/content/checkpoints"
     }
 }
