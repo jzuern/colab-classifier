@@ -113,7 +113,9 @@ def model_fn(features, labels, mode):
     x = tf.cast(x, tf.float32)
 
     print("model_fn: x = ", x)
-    x = tf.reshape(x, [-1, img_res, img_res, 3])
+    x = tf.reshape(x, [-1, 16, 16, 3])
+    #x = tf.reshape(x, [-1, img_res, img_res, 3])
+    print("model_fn: x = ", x)
 
     logits = resnet.inference(x, n_res_blocks, reuse=False)
 
