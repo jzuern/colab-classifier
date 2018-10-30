@@ -266,7 +266,7 @@ def train_input_fn(batch_size=params["training"]["train_batch_size"], buffer_siz
     # The input-function must return a dict wrapping the images.
     print("eval_input_fn: images_batch = ", images_batch)
 
-    images_batch = tf.reshape(images_batch, [1, 32, 32, 3])
+    images_batch = tf.reshape(images_batch, [1, 16, 16, 3])
     print("eval_input_fn: x = ", images_batch)
 
 
