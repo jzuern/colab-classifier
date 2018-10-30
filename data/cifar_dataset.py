@@ -6,6 +6,9 @@ from PIL import Image
 import numpy as np
 from model.hyper_parameters import params
 from random import shuffle
+import scipy
+
+
 
 def _int64_feature(value):
     return tf.train.Feature(int64_list=tf.train.Int64List(value=[value]))
@@ -21,28 +24,28 @@ def maybe_convert_to_tfrecords():
 
     train_filename = root + 'train.tfrecords'
     eval_filename = root + 'eval.tfrecords'
-    csv_file = root + 'trainLabels.csv'
+    mat_file = root + 'cars_annos.mat'
 
     # Test if tfrecords files already exist
     if os.path.isfile(train_filename) and os.path.isfile(eval_filename):
+        
         print("Training and Evaluation tfrecord files already exist!")
         return
 
-
-    label_dict = {"airplane": 0,
-                  "automobile": 1,
-                  "bird": 2,
-                  "cat": 3,
-                  "deer": 4,
-                  "dog": 5,
-                  "frog": 6,
-                  "horse": 7,
-                  "ship": 8,
-                  "truck": 9}
-
-
     image_paths = []
     gt_labels = []
+
+    # Training data
+    train_writer = tf.python_io.TFRecordWriter(train_filename)
+
+    mat =  scipy.io.loadmat(mat_file)
+
+    print(mat)
+
+
+
+
+    # Validation data
 
     with open(csv_file, 'r') as csvfile:
         reader = csv.reader(csvfile, delimiter=',')
@@ -57,7 +60,6 @@ def maybe_convert_to_tfrecords():
 
 
     # open the TFRecords file
-    train_writer = tf.python_io.TFRecordWriter(train_filename)
     eval_writer = tf.python_io.TFRecordWriter(eval_filename)
 
     n_samples = len(image_paths)
