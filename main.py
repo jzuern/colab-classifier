@@ -21,7 +21,7 @@ def main(unused_argv):
         save_checkpoints_secs=120)
 
     # Create the Estimator
-    cancer_classifier = tf.estimator.Estimator(
+    estimator = tf.estimator.Estimator(
         model_fn=model_fn,
         model_dir=params["paths"]["ckpt_path"],
         config=run_config)
@@ -36,10 +36,10 @@ def main(unused_argv):
         throttle_secs=100)
 
     # train and evaluate estimator using these specs
-    tf.estimator.train_and_evaluate(cancer_classifier, train_spec, eval_spec)
+    tf.estimator.train_and_evaluate(estimator, train_spec, eval_spec)
 
     # predict class based on input
-    results = cancer_classifier.predict(input_fn=predict_input_fn)
+    results = estimator.predict(input_fn=predict_input_fn)
 
     i = 0
     for result in results:
