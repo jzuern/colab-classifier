@@ -203,7 +203,10 @@ def parse_fn(serialized):
     image = tf.decode_raw(image_raw, tf.float32)
 
     res = params["architecture"]["image_resolution"]
+    
     image = tf.reshape(image, [res, res, 3])
+
+    print("parse_fn: image = ", image)
 
     # Get the label associated with the image.
     label = parsed_example['label']
