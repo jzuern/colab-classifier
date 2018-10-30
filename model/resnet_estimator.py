@@ -117,8 +117,6 @@ def model_fn(features, labels, mode):
     logits = resnet.inference(x, n_res_blocks, reuse=False)
 
 
-    labels_names = ["bkl", "nv", "mel", "bcc", "akiec", "vasc", "df"]
-
     predicted_labels = tf.argmax(input=logits, axis=1)
 
     predictions = {

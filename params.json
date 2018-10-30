@@ -4,7 +4,7 @@
         "num_residual_blocks": 2,
         "l2_weight_decay": 0.0002,
         "nonlinearity": "relu",
-        "image_resolution": 32,
+        "image_resolution": 16,
         "batch_normalization_epsilon": 0.001,
         "n_output_classes": 10
     },
@@ -21,6 +21,6 @@
     },
     "paths": {
         "data_dir": "/content/cifar-10-data/",
-        "ckpt_path": "/content/drive/classifier/checkpoints"
+        "ckpt_path": "/content/checkpoints"
     }
 }
