@@ -4,7 +4,7 @@
         "num_residual_blocks": 2,
         "l2_weight_decay": 0.0002,
         "nonlinearity": "relu",
-        "image_resolution": 16,
+        "image_resolution": 32,
         "batch_normalization_epsilon": 0.001,
         "n_output_classes": 10
     },
@@ -17,7 +17,7 @@
     },
     "data_augmentation": {
         "weight_decay": 2,
-        "use_checkpoint": false
+        "use_checkpoint": false 
     },
     "paths": {
         "data_dir": "/content/cifar-10-data/",
