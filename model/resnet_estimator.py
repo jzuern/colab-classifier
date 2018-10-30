@@ -113,7 +113,7 @@ def model_fn(features, labels, mode):
     x = tf.cast(x, tf.float32)
 
     print("model_fn: x = ", x)
-    x = tf.reshape(x, [1, 100, 100, 3])
+    x = tf.reshape(x, [1, 32, 32, 3])
     #x = tf.reshape(x, [-1, img_res, img_res, 3])
     print("model_fn: x = ", x)
 
