@@ -264,6 +264,10 @@ def train_input_fn(batch_size=params["training"]["train_batch_size"], buffer_siz
     x = {'image': images_batch}
     y = labels_batch
 
+
+    print("train_input_fn: x = ", x)
+
+
     return x, y
 
 

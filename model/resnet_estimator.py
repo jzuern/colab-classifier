@@ -106,13 +106,13 @@ def tf_put_text(imgs, gt_label, pred_label):
 
 def model_fn(features, labels, mode):
 
-    #n_res_blocks = hyperparams.FLAGS.num_residual_blocks
     n_res_blocks = params["architecture"]["num_residual_blocks"]
-    #img_res = hyperparams.FLAGS.image_resolution
     img_res = root = params["architecture"]["image_resolution"]
 
     x = features['image']
-    print(x)
+    x = tf.cast(x, tf.float32)
+
+    print("model_fn: x = ", x)
     x = tf.reshape(x, [-1, img_res, img_res, 3])
 
     logits = resnet.inference(x, n_res_blocks, reuse=False)
