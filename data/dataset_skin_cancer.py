@@ -264,6 +264,7 @@ def train_input_fn(batch_size=params["training"]["train_batch_size"], buffer_siz
     x = {'image': images_batch}
     y = labels_batch
 
+    x = tf.reshape(x, [1, 32, 32, 3])
 
     print("train_input_fn: x = ", x)
 
@@ -319,6 +320,12 @@ def eval_input_fn(batch_size=params["training"]["validation_batch_size"], buffer
     x = {'image': images_batch}
     y = labels_batch
 
+
+    x = tf.reshape(x, [1, 32, 32, 3])
+
+    print("eval_input_fn: x = ", x)
+
+
     return x, y
 
 
@@ -369,5 +376,10 @@ def predict_input_fn(batch_size=params["training"]["test_batch_size"], buffer_si
     # The input-function must return a dict wrapping the images.
     x = {'image': images_batch}
     y = labels_batch
+
+    x = tf.reshape(x, [1, 32, 32, 3])
+
+    print("test_input_fn: x = ", x)
+
 
     return x, y
