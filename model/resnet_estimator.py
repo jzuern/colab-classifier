@@ -112,6 +112,7 @@ def model_fn(features, labels, mode):
     img_res = root = params["architecture"]["image_resolution"]
 
     x = features['image']
+    print(x)
     x = tf.reshape(x, [-1, img_res, img_res, 3])
 
     logits = resnet.inference(x, n_res_blocks, reuse=False)

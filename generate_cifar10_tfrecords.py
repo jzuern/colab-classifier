@@ -75,6 +75,8 @@ def convert_to_tfrecord(input_files, output_file):
 
             data_dict = read_pickle_from_file(input_file)
             data = data_dict[b'data']
+
+            
             labels = data_dict[b'labels']
             num_entries_in_batch = len(labels)
             for i in range(num_entries_in_batch):
