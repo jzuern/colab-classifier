@@ -30,7 +30,7 @@ def create_variables(name, shape, initializer=tf.contrib.layers.xavier_initializ
     :return: The created variable
     '''
 
-    regularizer = tf.contrib.layers.l2_regularizer(scale=params["architecture"]["weight_decay"])
+    regularizer = tf.contrib.layers.l2_regularizer(scale=params["architecture"]["l2_weight_decay"])
 
     new_variables = tf.get_variable(name, shape=shape, initializer=initializer,
                                     regularizer=regularizer)
