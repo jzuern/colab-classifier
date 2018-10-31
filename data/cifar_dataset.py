@@ -42,11 +42,7 @@ def maybe_convert_to_tfrecords():
 
     print(mat)
 
-
-
-
     # Validation data
-
     with open(csv_file, 'r') as csvfile:
         reader = csv.reader(csvfile, delimiter=',')
         for row in reader:
