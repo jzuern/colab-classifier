@@ -6,7 +6,7 @@ from PIL import Image
 import numpy as np
 from model.hyper_parameters import params
 from random import shuffle
-import scipy
+import scipy.io
 
 
 
