@@ -3,7 +3,7 @@
         "l2_weight_decay": 0.0002,
         "image_resolution": 75,
         "n_output_classes": 196,
-        "image_input_name": "conv2d_input"
+        "image_input_name": "input_1"
     },
     "training": {
         "train_steps": 10000,
