@@ -220,7 +220,7 @@ def eval_input_fn(batch_size=params["training"]["validation_batch_size"], buffer
     # buffer_size: Read buffers of this size. The random shuffling
     #              is done on the buffer, so it must be big enough.
 
-    tfrecords_filename = params["paths"]["data_dir"] + 'eval.tfrecords'
+    tfrecords_filename = params["paths"]["data_dir"] + 'train.tfrecords'
 
     # Create a TensorFlow Dataset-object which has functionality
     # for reading and shuffling data from TFRecords files.
