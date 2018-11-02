@@ -14,13 +14,13 @@ tf.logging.set_verbosity(tf.logging.DEBUG)
 
 def resnet_model():
 
-    model = Xception(weights=None,
+    model = ResNet50(weights=None,
                       include_top=True,
                       input_shape=(75, 75, 3),
                       classes=196)
 
     model.compile(loss='sparse_categorical_crossentropy',
-                  optimizer=tf.keras.optimizers.RMSprop(lr=2e-5),
+                  optimizer=tf.keras.optimizers.Adam(lr=1e-4),
                   metrics=['acc'])
 
     return model
