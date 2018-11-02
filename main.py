@@ -20,7 +20,7 @@ def resnet_model():
                       classes=196)
 
     model.compile(loss='sparse_categorical_crossentropy',
-                  optimizer=tf.keras.optimizers.Adam(lr=1e-4),
+                  optimizer=tf.keras.optimizers.Adam(lr=2e-5),
                   metrics=['acc'])
 
     return model
