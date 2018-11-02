@@ -74,7 +74,7 @@ def maybe_convert_to_tfrecords():
 
         for row in csvReader:
 
-            if train_counter < 500:
+            if train_counter < 100000:
 
                 print(row)
                 label = int(row[5]) - 1  # compensate for class index offset of 1
@@ -98,7 +98,7 @@ def maybe_convert_to_tfrecords():
         csvReader = csv.reader(csvDataFile, delimiter=',')
         for row in csvReader:
 
-            if eval_counter < 500:
+            if eval_counter < 100000:
 
                 print(row)
                 label = int(row[5]) - 1  # compensate for class index offset of 1
