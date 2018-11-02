@@ -19,8 +19,6 @@ def _bytes_feature(value):
 
 def _path_to_features(writer, label, image_path):
 
-    print("feature label = ", label)
-
     pil_img = Image.open(image_path)  # open image and convert to grayscale
     res = params["architecture"]["image_resolution"]
 
@@ -29,6 +27,8 @@ def _path_to_features(writer, label, image_path):
     img = np.asarray(pil_img, dtype=np.uint8)
     img = img.astype(np.float32)
     img = np.multiply(img, 1.0 / 255.0)
+
+    print(img.shape)
 
     # Create a feature
     feature = {'label': _int64_feature(label),
@@ -74,7 +74,7 @@ def maybe_convert_to_tfrecords():
 
         for row in csvReader:
 
-            if train_counter < 100:
+            if train_counter < 200:
 
                 print(row)
                 label = int(row[5]) - 1  # compensate for class index offset of 1
@@ -98,7 +98,7 @@ def maybe_convert_to_tfrecords():
         csvReader = csv.reader(csvDataFile, delimiter=',')
         for row in csvReader:
 
-            if eval_counter < 100:
+            if eval_counter < 200:
 
                 print(row)
                 label = int(row[5]) - 1  # compensate for class index offset of 1
@@ -138,7 +138,7 @@ def parse_fn(serialized):
 
     # Decode the raw bytes so it becomes a tensor with type.
     image = tf.decode_raw(image_raw, tf.float32)
-    print("parse_fn: image = ", image)
+    # print("parse_fn: image = ", image)
 
     res = params["architecture"]["image_resolution"]
     
@@ -203,7 +203,7 @@ def train_input_fn(batch_size=params["training"]["train_batch_size"], buffer_siz
     print("train_input_fn: images_batch = ", images_batch)
     res = params["architecture"]["image_resolution"]
 
-    images_batch = tf.reshape(images_batch, [-1, res, res, 3])
+    images_batch = tf.reshape(images_batch, [1, res, res, 3])
     print("train_input_fn: x = ", images_batch)
 
     x = {'input_1': images_batch}
@@ -220,7 +220,7 @@ def eval_input_fn(batch_size=params["training"]["validation_batch_size"], buffer
     # buffer_size: Read buffers of this size. The random shuffling
     #              is done on the buffer, so it must be big enough.
 
-    tfrecords_filename = params["paths"]["data_dir"] + 'train.tfrecords'
+    tfrecords_filename = params["paths"]["data_dir"] + 'eval.tfrecords'
 
     # Create a TensorFlow Dataset-object which has functionality
     # for reading and shuffling data from TFRecords files.
@@ -233,9 +233,12 @@ def eval_input_fn(batch_size=params["training"]["validation_batch_size"], buffer
 
     dataset = dataset.map(parse_fn)
 
+    dataset = dataset.shuffle(buffer_size=buffer_size)
+
+
     # If testing then don't shuffle the data.
     # Only go through the data once.
-    num_repeat = 1
+    num_repeat = None
 
     # Repeat the dataset the given number of times.
     dataset = dataset.repeat(num_repeat)
@@ -259,14 +262,11 @@ def eval_input_fn(batch_size=params["training"]["validation_batch_size"], buffer
     # The input-function must return a dict wrapping the images.
     res = params["architecture"]["image_resolution"]
 
-    images_batch = tf.reshape(images_batch, [-1, res, res, 3])
+    images_batch = tf.reshape(images_batch, [1, res, res, 3])
     print("eval_input_fn: x = ", images_batch)
 
     x = {'input_1': images_batch}
     y = labels_batch
-
-
-
 
 
     return x, y
@@ -319,7 +319,7 @@ def predict_input_fn(batch_size=params["training"]["test_batch_size"], buffer_si
     # The input-function must return a dict wrapping the images.
     res = params["architecture"]["image_resolution"]
 
-    images_batch = tf.reshape(images_batch, [-1, res, res, 1])
+    images_batch = tf.reshape(images_batch, [1, res, res, 1])
     print("eval_input_fn: x = ", images_batch)
 
     x = {'input_1': images_batch}
