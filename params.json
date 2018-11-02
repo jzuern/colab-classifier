@@ -16,7 +16,7 @@
         "use_checkpoint": false 
     },
     "paths": {
-        "data_dir": "/home/jannik/Desktop/colab-classifier-master/data/stanford-car-dataset-by-classes-folder/",
-        "ckpt_path": "/home/jannik/Desktop/colab-classifier-master/checkpoints/"
+        "data_dir": "/content/cars/",
+        "ckpt_path": "/content/checkpoints/"
     }
 }
