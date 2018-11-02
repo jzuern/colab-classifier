@@ -111,165 +111,105 @@ def tf_put_text(imgs, gt_label, pred_label):
     return tf.py_func(put_text, [imgs, gt_label, pred_label], Tout=imgs.dtype)
 
 
-def vgg_like():
 
-    model = tf.keras.Sequential()
-    # input: 100x100 images with 3 channels -> (100, 100, 3) tensors.
-    # this applies 32 convolution filters of size 3x3 each.
-    model.add(tf.keras.layers.Conv2D(32, (3, 3), activation='relu', input_shape=(75, 75, 3)))
-    model.add(tf.keras.layers.Conv2D(32, (3, 3), activation='relu'))
-    model.add(tf.keras.layers.MaxPooling2D(pool_size=(2, 2)))
-    model.add(tf.keras.layers.Dropout(0.25))
+# def model_fn(features, labels, mode):
+#
+#     x = features['image']
 
-    model.add(tf.keras.layers.Conv2D(64, (3, 3), activation='relu'))
-    model.add(tf.keras.layers.Conv2D(64, (3, 3), activation='relu'))
-    model.add(tf.keras.layers.MaxPooling2D(pool_size=(2, 2)))
-    model.add(tf.keras.layers.Dropout(0.25))
-
-    model.add(tf.keras.layers.Flatten())
-    model.add(tf.keras.layers.Dense(256, activation='relu'))
-    model.add(tf.keras.layers.Dropout(0.5))
-    model.add(tf.keras.layers.Dense(196, activation='softmax'))
-
-
-    return model
-
-def mnist():
-
-    l = tf.keras.layers
-
-    input_shape = [75, 75, 1]
-    data_format = 'channels_last'
-
-    max_pool = l.MaxPooling2D(
-        (2, 2), (2, 2), padding='same', data_format=data_format)
-    # The model consists of a sequential chain of layers, so tf.keras.Sequential
-    # (a subclass of tf.keras.Model) makes for a compact description.
-    return tf.keras.Sequential(
-        [
-            l.Reshape(
-                target_shape=input_shape,
-                input_shape=(75 * 75,)),
-            l.Conv2D(
-                32,
-                5,
-                padding='same',
-                data_format=data_format,
-                activation=tf.nn.relu),
-            max_pool,
-            l.Conv2D(
-                64,
-                5,
-                padding='same',
-                data_format=data_format,
-                activation=tf.nn.relu),
-            max_pool,
-            l.Flatten(),
-            l.Dense(1024, activation=tf.nn.relu),
-            l.Dropout(0.4),
-            l.Dense(196)
-        ])
-
-
-def model_fn(features, labels, mode):
-
-    x = features['image']
-
-    img_res = params["architecture"]["image_resolution"]
-    x = tf.reshape(x, [-1, img_res, img_res, 1])
-    print("model_fn: x = ", x)
-
-
-    # model = vgg_like()
-    model = mnist()
-
-    logits = model(x)
-
-    predicted_labels = tf.argmax(input=logits, axis=1)
-
-    predictions = {
-        "classes": predicted_labels,
-        "probabilities": tf.nn.softmax(logits, name="softmax_tensor")
-    }
-
-    if mode == tf.estimator.ModeKeys.PREDICT:
-        return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
-
-    # Calculate Loss (for both TRAIN and EVAL modes)
-    loss = tf.losses.sparse_softmax_cross_entropy(labels=labels, logits=logits)
-
-    # Configure the Training Op (for TRAIN mode)
-    if mode == tf.estimator.ModeKeys.TRAIN:
-
-        optimizer = tf.train.AdamOptimizer(learning_rate=params["training"]["learning_rate"])
-
-        train_op = optimizer.minimize(
-            loss=loss,
-            global_step=tf.train.get_global_step())
-
-        tf.summary.scalar(name='training/loss', tensor=tf.squeeze(loss))
-
-        accuracy = tf.metrics.accuracy(labels=labels, predictions=predictions["classes"])
-        
-        tf.summary.scalar(name='training/accuracy', tensor=accuracy[1])
-
-        tf.summary.scalar(name='training/gt_labels', tensor=labels[0])
-
-        tf.summary.image(name='training/images', tensor=x, max_outputs=1)
-
-        annotated_images = tf_put_text(x, labels, predicted_labels)
-        
-        tf.summary.image('training/annotated_images',
-                         annotated_images,
-                         max_outputs=1)
-
-        ''' confusion matrix summaries '''
-        #cm_summary = cmatrix_summary('confusion_matrix', labels_names)
-
-        training_summary_hook = tf.train.SummarySaverHook(
-            save_steps=10,
-            output_dir=params["paths"]["ckpt_path"],
-            summary_op=tf.summary.merge_all())
-
-        return tf.estimator.EstimatorSpec(
-            mode=mode,
-            loss=loss,
-            train_op=train_op,
-            training_hooks=[training_summary_hook])
-
-    if mode == tf.estimator.ModeKeys.EVAL:
-
-        # Add evaluation metrics (for EVAL mode)
-        eval_metric_ops = {
-            "accuracy": tf.metrics.accuracy(
-                labels=labels, predictions=predictions["classes"])}
-
-
-        tf.summary.scalar(name='eval/loss', tensor=tf.squeeze(loss))
-
-        accuracy = tf.metrics.accuracy(labels=labels, predictions=predictions["classes"])
-
-
-        tf.summary.scalar(name='eval/accuracy', tensor=accuracy[1])
-
-        tf.summary.scalar(name='eval/gt_labels', tensor=labels[0])
-
-        tf.summary.image(name='eval/image', tensor=x, max_outputs=1)
-
-        annotated_images = tf_put_text(x, labels, predicted_labels)
-        tf.summary.image('eval/annotated_images',
-                         annotated_images,
-                         max_outputs=1)
-
-        eval_summary_hook = tf.train.SummarySaverHook(
-            save_steps=10,
-            output_dir=params["paths"]["ckpt_path"],
-            summary_op=tf.summary.merge_all())
-
-        return tf.estimator.EstimatorSpec(
-            mode=mode,
-            loss=loss,
-            eval_metric_ops=eval_metric_ops,
-            evaluation_hooks=[eval_summary_hook])
-
-    raise ValueError
+    # img_res = params["architecture"]["image_resolution"]
+    # x = tf.reshape(x, [-1, img_res, img_res, 1])
+    # print("model_fn: x = ", x)
+    #
+    #
+    # # model = vgg_like()
+    #
+    # # logits = model(x)
+    #
+    # predicted_labels = tf.argmax(input=logits, axis=1)
+    #
+    # predictions = {
+    #     "classes": predicted_labels,
+    #     "probabilities": tf.nn.softmax(logits, name="softmax_tensor")
+    # }
+    #
+    # if mode == tf.estimator.ModeKeys.PREDICT:
+    #     return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
+    #
+    # # Calculate Loss (for both TRAIN and EVAL modes)
+    # loss = tf.losses.sparse_softmax_cross_entropy(labels=labels, logits=logits)
+    #
+    # # Configure the Training Op (for TRAIN mode)
+    # if mode == tf.estimator.ModeKeys.TRAIN:
+    #
+    #     optimizer = tf.train.AdamOptimizer(learning_rate=params["training"]["learning_rate"])
+    #
+    #     train_op = optimizer.minimize(
+    #         loss=loss,
+    #         global_step=tf.train.get_global_step())
+    #
+    #     tf.summary.scalar(name='training/loss', tensor=tf.squeeze(loss))
+    #
+    #     accuracy = tf.metrics.accuracy(labels=labels, predictions=predictions["classes"])
+    #
+    #     tf.summary.scalar(name='training/accuracy', tensor=accuracy[1])
+    #
+    #     tf.summary.scalar(name='training/gt_labels', tensor=labels[0])
+    #
+    #     tf.summary.image(name='training/images', tensor=x, max_outputs=1)
+    #
+    #     annotated_images = tf_put_text(x, labels, predicted_labels)
+    #
+    #     tf.summary.image('training/annotated_images',
+    #                      annotated_images,
+    #                      max_outputs=1)
+    #
+    #     ''' confusion matrix summaries '''
+    #     #cm_summary = cmatrix_summary('confusion_matrix', labels_names)
+    #
+    #     training_summary_hook = tf.train.SummarySaverHook(
+    #         save_steps=10,
+    #         output_dir=params["paths"]["ckpt_path"],
+    #         summary_op=tf.summary.merge_all())
+    #
+    #     return tf.estimator.EstimatorSpec(
+    #         mode=mode,
+    #         loss=loss,
+    #         train_op=train_op,
+    #         training_hooks=[training_summary_hook])
+    #
+    # if mode == tf.estimator.ModeKeys.EVAL:
+    #
+    #     # Add evaluation metrics (for EVAL mode)
+    #     eval_metric_ops = {
+    #         "accuracy": tf.metrics.accuracy(
+    #             labels=labels, predictions=predictions["classes"])}
+    #
+    #
+    #     tf.summary.scalar(name='eval/loss', tensor=tf.squeeze(loss))
+    #
+    #     accuracy = tf.metrics.accuracy(labels=labels, predictions=predictions["classes"])
+    #
+    #
+    #     tf.summary.scalar(name='eval/accuracy', tensor=accuracy[1])
+    #
+    #     tf.summary.scalar(name='eval/gt_labels', tensor=labels[0])
+    #
+    #     tf.summary.image(name='eval/image', tensor=x, max_outputs=1)
+    #
+    #     annotated_images = tf_put_text(x, labels, predicted_labels)
+    #     tf.summary.image('eval/annotated_images',
+    #                      annotated_images,
+    #                      max_outputs=1)
+    #
+    #     eval_summary_hook = tf.train.SummarySaverHook(
+    #         save_steps=10,
+    #         output_dir=params["paths"]["ckpt_path"],
+    #         summary_op=tf.summary.merge_all())
+    #
+    #     return tf.estimator.EstimatorSpec(
+    #         mode=mode,
+    #         loss=loss,
+    #         eval_metric_ops=eval_metric_ops,
+    #         evaluation_hooks=[eval_summary_hook])
+    #
+    # raise ValueError
