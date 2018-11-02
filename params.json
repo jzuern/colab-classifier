@@ -7,10 +7,10 @@
     },
     "training": {
         "train_steps": 10000,
-        "learning_rate": 0.001,
-        "train_batch_size": 1,
-        "validation_batch_size": 1,
-        "test_batch_size": 1
+        "learning_rate": 0.00001,
+        "train_batch_size": 32,
+        "validation_batch_size": 32,
+        "test_batch_size": 32
     },
     "data_augmentation": {
         "weight_decay": 2,
