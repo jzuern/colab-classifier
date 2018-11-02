@@ -104,7 +104,7 @@ def maybe_convert_to_tfrecords():
                 label = int(row[5]) - 1  # compensate for class index offset of 1
 
                 class_path = class_names[label]
-                class_path = string.replace(class_path, '/', '-')
+                class_path.replace('/', '-')
 
                 image_path = validation_data_dir + class_path + '/' + row[0]
 
