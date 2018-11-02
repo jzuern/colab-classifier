@@ -6,6 +6,7 @@ import tensorflow as tf
 from data.car_dataset import train_input_fn, eval_input_fn, predict_input_fn, maybe_convert_to_tfrecords
 from model.hyper_parameters import params
 from tensorflow.python.keras.applications.resnet50 import ResNet50
+from tensorflow.python.keras.applications.xception import Xception
 
 
 tf.logging.set_verbosity(tf.logging.DEBUG)
@@ -13,7 +14,7 @@ tf.logging.set_verbosity(tf.logging.DEBUG)
 
 def resnet_model():
 
-    model = ResNet50(weights=None,
+    model = Xception(weights=None,
                       include_top=True,
                       input_shape=(75, 75, 3),
                       classes=196)
