@@ -6,9 +6,7 @@
 Based on ResNet-50 architecture by Wenxin Xu (https://github.com/wenxinxu/resnet_in_tensorflow)
 
 
-
-
 # TODO
-
-- get running with cars dataset
-- 
+- Implement confusion matrix
+- clean up code
+- add tests
