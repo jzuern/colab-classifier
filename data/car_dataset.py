@@ -19,7 +19,7 @@ def _bytes_feature(value):
 
 def _path_to_features(writer, label, image_path):
 
-    pil_img = Image.open(image_path)  # open image and convert to grayscale
+    pil_img = Image.open(image_path).convert('RGB')  # open image and convert to grayscale
     res = params["architecture"]["image_resolution"]
 
     pil_img = pil_img.resize([res, res])
@@ -32,7 +32,7 @@ def _path_to_features(writer, label, image_path):
 
     # Create a feature
     feature = {'label': _int64_feature(label),
-               'input_1': _bytes_feature(img.tostring())}
+               str(params["architecture"]["image_input_name"]): _bytes_feature(img.tostring())}
 
     sample = tf.train.Example(features=tf.train.Features(feature=feature))
     writer.write(sample.SerializeToString())
@@ -74,7 +74,7 @@ def maybe_convert_to_tfrecords():
 
         for row in csvReader:
 
-            if train_counter < 200:
+            if train_counter < 500:
 
                 print(row)
                 label = int(row[5]) - 1  # compensate for class index offset of 1
@@ -98,7 +98,7 @@ def maybe_convert_to_tfrecords():
         csvReader = csv.reader(csvDataFile, delimiter=',')
         for row in csvReader:
 
-            if eval_counter < 200:
+            if eval_counter < 500:
 
                 print(row)
                 label = int(row[5]) - 1  # compensate for class index offset of 1
@@ -125,7 +125,7 @@ def parse_fn(serialized):
 
     features = \
         {
-            'input_1': tf.FixedLenFeature([], tf.string),
+            str(params["architecture"]["image_input_name"]): tf.FixedLenFeature([], tf.string),
             'label': tf.FixedLenFeature([], tf.int64)
         }
 
@@ -134,7 +134,7 @@ def parse_fn(serialized):
                                              features=features)
 
     # Get the image as raw bytes.
-    image_raw = parsed_example['input_1']
+    image_raw = parsed_example[str(params["architecture"]["image_input_name"])]
 
     # Decode the raw bytes so it becomes a tensor with type.
     image = tf.decode_raw(image_raw, tf.float32)
@@ -203,10 +203,9 @@ def train_input_fn(batch_size=params["training"]["train_batch_size"], buffer_siz
     print("train_input_fn: images_batch = ", images_batch)
     res = params["architecture"]["image_resolution"]
 
-    images_batch = tf.reshape(images_batch, [1, res, res, 3])
-    print("train_input_fn: x = ", images_batch)
+    images_batch = tf.reshape(images_batch, [-1, res, res, 3])
 
-    x = {'input_1': images_batch}
+    x = {str(params["architecture"]["image_input_name"]): images_batch}
     y = labels_batch
 
     return x, y
@@ -262,10 +261,9 @@ def eval_input_fn(batch_size=params["training"]["validation_batch_size"], buffer
     # The input-function must return a dict wrapping the images.
     res = params["architecture"]["image_resolution"]
 
-    images_batch = tf.reshape(images_batch, [1, res, res, 3])
-    print("eval_input_fn: x = ", images_batch)
+    images_batch = tf.reshape(images_batch, [-1, res, res, 3])
 
-    x = {'input_1': images_batch}
+    x = {str(params["architecture"]["image_input_name"]): images_batch}
     y = labels_batch
 
 
@@ -319,10 +317,9 @@ def predict_input_fn(batch_size=params["training"]["test_batch_size"], buffer_si
     # The input-function must return a dict wrapping the images.
     res = params["architecture"]["image_resolution"]
 
-    images_batch = tf.reshape(images_batch, [1, res, res, 1])
-    print("eval_input_fn: x = ", images_batch)
+    images_batch = tf.reshape(images_batch, [-1, res, res, 1])
 
-    x = {'input_1': images_batch}
+    x = {str(params["architecture"]["image_input_name"]): images_batch}
     y = labels_batch
 
     return x, y
