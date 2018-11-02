@@ -26,6 +26,7 @@ def _path_to_features(writer, label, image_path):
 
     img = np.asarray(pil_img, dtype=np.uint8)
     img = img.astype(np.float32)
+    img = img.subtract(128.0)
     img = np.multiply(img, 1.0 / 255.0)
 
     print(img.shape)
