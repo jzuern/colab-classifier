@@ -4,7 +4,7 @@ import numpy as np
 import pickle
 import os
 import urllib
-
+from model.hyper_parameters import params
 ########################################################################
 
 # Directory where you want to download and save the data-set.
