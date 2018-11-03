@@ -3,7 +3,7 @@ from __future__ import division
 from __future__ import print_function
 
 import tensorflow as tf
-from data.car_dataset import train_input_fn, eval_input_fn, predict_input_fn, maybe_convert_to_tfrecords
+from data.cifar_dataset import train_input_fn, eval_input_fn, predict_input_fn, maybe_download_and_extract
 from model.hyper_parameters import params
 from tensorflow.python.keras.applications.resnet50 import ResNet50
 from tensorflow.python.keras.applications.xception import Xception
@@ -28,7 +28,13 @@ def resnet_model():
 def main(unused_argv):
 
     # convert the images to tfrecords
-    maybe_convert_to_tfrecords()
+    #maybe_convert_to_tfrecords()
+
+    maybe_download_and_extract()
+
+    load_training_data()
+    
+    load_validation_data()
 
     # define a run config
     run_config = tf.estimator.RunConfig(

@@ -18,7 +18,7 @@
         
     },
     "paths": {
-        "data_dir": "/content/cars/",
+        "data_dir": "/content/cifar-10/",
         "ckpt_path": "/content/checkpoints/"
     }
 }
