@@ -22,7 +22,7 @@ def _path_to_features(writer, label, image_path):
     pil_img = Image.open(image_path).convert('RGB')  # open image and convert to grayscale
     res = params["architecture"]["image_resolution"]
 
-    pil_img = pil_img.resize([res, res])
+    #pil_img = pil_img.resize([res, res])
 
     img = np.asarray(pil_img, dtype=np.uint8)
     img = img.astype(np.float32)
@@ -39,37 +39,40 @@ def _path_to_features(writer, label, image_path):
     writer.write(sample.SerializeToString())
 
 
-
 def maybe_convert_to_tfrecords():
+
+    class_dict = {
+        "airplane": 0, 
+        "automobile": 1,
+        "bird": 2,
+        "cat": 3,
+        "deer": 4,
+        "dog": 5,
+        "frog": 6,
+        "horse": 7,
+        "ship": 8,
+        "truck": 9}
 
     root = params["paths"]["data_dir"]
 
     train_filename = root + 'train.tfrecords'
-    eval_filename = root + 'eval.tfrecords'
+    #eval_filename = root + 'eval.tfrecords'
 
     # Test if tfrecords files already exist
-    if os.path.isfile(train_filename) and os.path.isfile(eval_filename):
+    if os.path.isfile(train_filename):
         
         print("Training and Evaluation tfrecord files already exist!")
         return
 
-    # get names for classes
-    class_names = []
 
-    with open(root + 'names.csv') as csvDataFile:
-        csv_reader = csv.reader(csvDataFile, delimiter=';')
-        for row in csv_reader:
-            class_names.append(row[0])
-
-
-    train_data_dir = root + 'car_data/train/'
+    train_data_dir = root + 'cifar-10/train/'
 
     # open the TFRecords file
     train_writer = tf.python_io.TFRecordWriter(train_filename)
 
     train_counter = 0
 
-    with open(root + 'anno_train.csv') as csvDataFile:
+    with open(root + 'trainLabels.csv') as csvDataFile:
 
         csvReader = csv.reader(csvDataFile, delimiter=',')
 
@@ -318,7 +321,7 @@ def predict_input_fn(batch_size=params["training"]["test_batch_size"], buffer_si
     # The input-function must return a dict wrapping the images.
     res = params["architecture"]["image_resolution"]
 
-    images_batch = tf.reshape(images_batch, [-1, res, res, 1])
+    images_batch = tf.reshape(images_batch, [-1, res, res, 3])
 
     x = {str(params["architecture"]["image_input_name"]): images_batch}
     y = labels_batch

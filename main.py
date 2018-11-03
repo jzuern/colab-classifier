@@ -14,10 +14,10 @@ tf.logging.set_verbosity(tf.logging.DEBUG)
 
 def resnet_model():
 
-    model = ResNet50(weights=None,
+    model = Xception(weights=None,
                       include_top=True,
-                      input_shape=(75, 75, 3),
-                      classes=196)
+                      input_shape=(32, 32, 3),
+                      classes=10)
 
     model.compile(loss='sparse_categorical_crossentropy',
                   optimizer=tf.keras.optimizers.Adam(lr=2e-5),
@@ -35,6 +35,7 @@ def main(unused_argv):
         save_checkpoints_secs=10*60)
 
     keras_resnet_model = resnet_model()
+
     estimator = tf.keras.estimator.model_to_estimator(
         keras_model=keras_resnet_model,
         model_dir=params["paths"]["ckpt_path"],

@@ -10,3 +10,5 @@ Based on ResNet-50 architecture by Wenxin Xu (https://github.com/wenxinxu/resnet
 - Implement confusion matrix
 - clean up code
 - add tests
+- add Summaries
+- Why validation loss so high?
