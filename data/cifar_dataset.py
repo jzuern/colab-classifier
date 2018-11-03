@@ -73,8 +73,7 @@ def download(base_url, filename, download_dir):
         # Download the file from the internet.
         url = base_url + filename
         file_path, _ = urllib.request.urlretrieve(url=url,
-                                                  filename=save_path,
-                                                  reporthook=_print_download_progress)
+                                                  filename=save_path)
 
         print(" Done!")
 
