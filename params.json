@@ -1,6 +1,5 @@
 {
     "architecture": {
-        "l2_weight_decay": 0.0002,
         "image_resolution": 32,
         "n_output_classes": 10,
         "image_input_name": "input_1"
@@ -13,9 +12,7 @@
         "test_batch_size": 32
     },
     "data_augmentation": {
-        "weight_decay": 2,
         "use_checkpoint": false 
-        
     },
     "paths": {
         "data_dir": "/content/cifar-10/",
