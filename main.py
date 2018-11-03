@@ -32,7 +32,7 @@ def main(unused_argv):
 
     # define a run config
     run_config = tf.estimator.RunConfig(
-        save_checkpoints_secs=2*60)
+        save_checkpoints_secs=10*60)
 
     keras_resnet_model = resnet_model()
     estimator = tf.keras.estimator.model_to_estimator(
@@ -47,7 +47,7 @@ def main(unused_argv):
 
     eval_spec = tf.estimator.EvalSpec(
         input_fn=eval_input_fn,
-        throttle_secs=60)
+        throttle_secs=10*60)
 
     # train and evaluate estimator using these specs
     tf.estimator.train_and_evaluate(estimator, train_spec, eval_spec)
