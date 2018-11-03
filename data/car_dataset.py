@@ -56,7 +56,7 @@ def maybe_convert_to_tfrecords():
     # get names for classes
     class_names = []
 
-    with open(root + '/names.csv') as csvDataFile:
+    with open(root + 'names.csv') as csvDataFile:
         csv_reader = csv.reader(csvDataFile, delimiter=';')
         for row in csv_reader:
             class_names.append(row[0])
@@ -69,7 +69,7 @@ def maybe_convert_to_tfrecords():
 
     train_counter = 0
 
-    with open(root + '/anno_train.csv') as csvDataFile:
+    with open(root + 'anno_train.csv') as csvDataFile:
 
         csvReader = csv.reader(csvDataFile, delimiter=',')
 
@@ -94,7 +94,7 @@ def maybe_convert_to_tfrecords():
     validation_data_dir = root + 'car_data/test/'
     eval_counter = 0
 
-    with open(root + '/anno_test.csv') as csvDataFile:
+    with open(root + 'anno_test.csv') as csvDataFile:
 
         csvReader = csv.reader(csvDataFile, delimiter=',')
         for row in csvReader:
