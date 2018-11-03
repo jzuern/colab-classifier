@@ -108,8 +108,7 @@ def maybe_download_and_extract(url=data_url, download_dir=data_path):
 
         # Download the file from the internet.
         file_path, _ = urllib.request.urlretrieve(url=url,
-                                                  filename=file_path,
-                                                  reporthook=_print_download_progress)
+                                                  filename=file_path)
 
         print()
         print("Download finished. Extracting files.")
