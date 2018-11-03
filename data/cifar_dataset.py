@@ -9,7 +9,7 @@ from model.hyper_parameters import params
 
 # Directory where you want to download and save the data-set.
 # Set this before you start calling any of the functions below.
-data_path = "data/CIFAR-10/"
+data_path = params["paths"]["data_dir"]
 
 # URL for the data-set on the internet.
 data_url = "https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz"
@@ -79,7 +79,7 @@ def download(base_url, filename, download_dir):
         print(" Done!")
 
 
-def maybe_download_and_extract(url, download_dir):
+def maybe_download_and_extract(url=data_url, download_dir=data_path):
     """
     Download and extract the data if it doesn't already exist.
     Assumes the url is a tar-ball file.
@@ -429,12 +429,6 @@ def _load_data(filename):
 
 
     return images, cls
-
-
-
-
-def maybe_download_and_extract():
-    download.maybe_download_and_extract(url=data_url, download_dir=data_path)
 
 
 def load_class_names():
