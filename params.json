@@ -2,20 +2,17 @@
     "architecture": {
         "image_resolution": 32,
         "n_output_classes": 10,
-        "image_input_name": "conv2d_input"
+        "image_input_name": "input_1"
     },
     "training": {
         "train_steps": 100000,
-        "learning_rate": 1e-3,
-        "train_batch_size": 32,
-        "validation_batch_size": 32,
-        "test_batch_size": 32
-    },
-    "data_augmentation": {
-        "use_checkpoint": false 
+        "learning_rate": 5e-4,
+        "train_batch_size": 64,
+        "validation_batch_size": 64,
+        "test_batch_size": 64
     },
     "paths": {
         "data_dir": "/tmp/cifar-data/",
-        "ckpt_path": "/tmp/checkpoints/"
+        "ckpt_path": "/tmp/cifar-data/checkpoints/"
     }
 }
