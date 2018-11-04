@@ -3,24 +3,44 @@ from __future__ import division
 from __future__ import print_function
 
 import tensorflow as tf
-from data.cifar_dataset import train_input_fn, eval_input_fn, predict_input_fn, maybe_download_and_extract
+from data.cifar_dataset import train_input_fn, eval_input_fn, predict_input_fn, maybe_download_and_extract, load_training_data, load_validation_data
 from model.hyper_parameters import params
-from tensorflow.python.keras.applications.resnet50 import ResNet50
-from tensorflow.python.keras.applications.xception import Xception
-
+from tensorflow.keras.layers import Dense, Conv2D, Activation, MaxPooling2D, Dropout, Flatten
+from tensorflow.keras import Sequential
+import argparse
 
 tf.logging.set_verbosity(tf.logging.DEBUG)
 
 
-def resnet_model():
+def cnn_model():
 
-    model = Xception(weights=None,
-                      include_top=True,
-                      input_shape=(32, 32, 3),
-                      classes=10)
+    model = Sequential()
+    model.add(Conv2D(32, (3, 3), padding='same',
+                     input_shape=(32, 32, 3)))
+    model.add(Activation('relu'))
+    model.add(Conv2D(32, (3, 3)))
+    model.add(Activation('relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Dropout(0.25))
+
+    model.add(Conv2D(64, (3, 3), padding='same'))
+    model.add(Activation('relu'))
+    model.add(Conv2D(64, (3, 3)))
+    model.add(Activation('relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Dropout(0.25))
+
+    model.add(Flatten())
+    model.add(Dense(512))
+    model.add(Activation('relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(10))
+    model.add(Activation('softmax'))
+
+    model.summary()
 
     model.compile(loss='sparse_categorical_crossentropy',
-                  optimizer=tf.keras.optimizers.Adam(lr=2e-5),
+                  optimizer=tf.keras.optimizers.Adam(lr=1e-3),
                   metrics=['acc'])
 
     return model
@@ -28,8 +48,6 @@ def resnet_model():
 def main(unused_argv):
 
     # convert the images to tfrecords
-    #maybe_convert_to_tfrecords()
-
     maybe_download_and_extract()
 
     load_training_data()
@@ -40,7 +58,7 @@ def main(unused_argv):
     run_config = tf.estimator.RunConfig(
         save_checkpoints_secs=10*60)
 
-    keras_resnet_model = resnet_model()
+    keras_resnet_model = cnn_model()
 
     estimator = tf.keras.estimator.model_to_estimator(
         keras_model=keras_resnet_model,
@@ -62,13 +80,17 @@ def main(unused_argv):
     # predict class based on input
     results = estimator.predict(input_fn=predict_input_fn)
 
-    i = 0
-    for result in results:
-        i+=1
-        if i < 10:
-            print('result: {}'.format(result))
-
 
 if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser()
+    #
+    # parser.add_argument('checkpoint_dir', default="/tmp/checkpoints",
+    #                     help='Directory of the checkpoint')
+    # parser.add_argument('data_dir', default="/tmp/cifar-10-data",
+    #                     help='Directory to save the CIFAR-10 data')
+
+    args = parser.parse_args()
+
     tf.app.run()
 

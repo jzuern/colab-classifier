@@ -7,6 +7,10 @@ import urllib
 from model.hyper_parameters import params
 import zipfile 
 import tarfile
+from six.moves import urllib
+import tensorflow as tf
+
+
 ########################################################################
 
 # Directory where you want to download and save the data-set.
@@ -47,9 +51,6 @@ _num_images_train = _num_files_train * _images_per_file
 
 ########################################################################
 # Private functions for downloading, unpacking and loading data-files.
-
-
-
 
 
 def download(base_url, filename, download_dir):
@@ -153,7 +154,7 @@ def parse_fn(serialized):
     image_raw = parsed_example[str(params["architecture"]["image_input_name"])]
 
     # Decode the raw bytes so it becomes a tensor with type.
-    image = tf.decode_raw(image_raw, tf.float32)
+    image = tf.decode_raw(image_raw, tf.float64)
     # print("parse_fn: image = ", image)
 
     res = params["architecture"]["image_resolution"]
@@ -369,7 +370,7 @@ def _unpickle(filename):
     with open(file_path, mode='rb') as file:
         # In Python 3.X it is important to set the encoding,
         # otherwise an exception is raised here.
-        data = pickle.load(file, encoding='bytes')
+        data = pickle.load(file)
 
     return data
 
@@ -409,23 +410,20 @@ def _load_data(filename):
     # Get the class-numbers for each image. Convert to numpy-array.
     cls = np.array(data[b'labels'])
 
-
-
-
     # Convert the images.
     images = _convert_images(raw_images)
 
-
-    for image, cl in zip(images, cls):
-
-        # Create a feature
-        feature = {'label': _int64_feature(label),
-               str(params["architecture"]["image_input_name"]): _bytes_feature(img.tostring())}
-
-        sample = tf.train.Example(features=tf.train.Features(feature=feature))
-        writer.write(sample.SerializeToString())
-
-
+    #
+    # for image, cl in zip(images, cls):
+    #
+    #     # Create a feature
+    #     feature = {'label': _int64_feature(cl),
+    #            str(params["architecture"]["image_input_name"]): _bytes_feature(image.tostring())}
+    #
+    #     sample = tf.train.Example(features=tf.train.Features(feature=feature))
+    #     writer.write(sample.SerializeToString())
+    #
+    #
 
 
     return images, cls
@@ -493,13 +491,13 @@ def load_training_data():
                    str(params["architecture"]["image_input_name"]): _bytes_feature(img.tostring())}
 
         sample = tf.train.Example(features=tf.train.Features(feature=feature))
-        writer.write(sample.SerializeToString())
+        train_writer.write(sample.SerializeToString())
 
 
     # return images, cls, one_hot_encoded(class_numbers=cls, num_classes=num_classes)
 
 
-def load_test_data():
+def load_validation_data():
     """
     Load all the test-data for the CIFAR-10 data-set.
 
@@ -514,18 +512,12 @@ def load_test_data():
 
     train_writer = tf.python_io.TFRecordWriter(root + 'eval.tfrecords')
 
-    for i in range(_num_images_train):
-
+    for img, cl in zip(images, cls):
 
         # Create a feature
-        feature = {'label': _int64_feature(label),
+        feature = {'label': _int64_feature(cl),
                    str(params["architecture"]["image_input_name"]): _bytes_feature(img.tostring())}
 
         sample = tf.train.Example(features=tf.train.Features(feature=feature))
-        writer.write(sample.SerializeToString())
+        train_writer.write(sample.SerializeToString())
 
-
-
-    #return images, cls, one_hot_encoded(class_numbers=cls, num_classes=num_classes)
-
-########################################################################

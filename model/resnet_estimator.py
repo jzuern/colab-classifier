@@ -11,12 +11,13 @@ import matplotlib
 import numpy as np
 from sklearn.metrics import confusion_matrix
 import keras
-from keras.layers import Dense, GlobalAveragePooling2D
-from keras.models import Model
-from keras.applications.inception_v3 import InceptionV3
+
+
+
 
 
 # from tf.python.keras.layers import Conv2D
+
 
 
 def cmatrix_summary(confusion_matrix_tensor_name, labels_names):
