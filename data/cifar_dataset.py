@@ -5,6 +5,8 @@ import pickle
 import os
 import urllib
 from model.hyper_parameters import params
+import zipfile 
+import tarfile
 ########################################################################
 
 # Directory where you want to download and save the data-set.
