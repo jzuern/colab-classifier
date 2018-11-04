@@ -15,6 +15,28 @@ tf.logging.set_verbosity(tf.logging.DEBUG)
 from tensorflow.keras.layers import BatchNormalization, AveragePooling2D, Input
 from tensorflow.keras import Model
 
+
+def lr_schedule(epoch):
+    """Learning Rate Schedule
+    Learning rate is scheduled to be reduced after 80, 120, 160, 180 epochs.
+    Called automatically every epoch as part of callbacks during training.
+    # Arguments
+        epoch (int): The number of epochs
+    # Returns
+        lr (float32): learning rate
+    """
+    lr = 1e-3
+    if epoch > 180:
+        lr *= 0.5e-3
+    elif epoch > 160:
+        lr *= 1e-3
+    elif epoch > 120:
+        lr *= 1e-2
+    elif epoch > 80:
+        lr *= 1e-1
+    print('Learning rate: ', lr)
+    return lr
+
 def resnet_layer(inputs,
                  num_filters=16,
                  kernel_size=3,
@@ -152,7 +174,7 @@ def resnet_v2(input_shape, depth, num_classes=10):
     model.summary()
 
     model.compile(loss='sparse_categorical_crossentropy',
-                  optimizer=tf.keras.optimizers.Adam(lr=1e-3),
+                  optimizer=tf.keras.optimizers.Adam(lr=params["training"]["learning_rate"]),
                   metrics=['accuracy'])
 
     return model
@@ -204,7 +226,7 @@ def main(unused_argv):
         save_checkpoints_secs=10*60)
 
     # keras_resnet_model = cnn_model()
-    keras_resnet_model = resnet_v2((32, 32, 3), 20)
+    keras_resnet_model = resnet_v2((32, 32, 3), 56)
 
     estimator = tf.keras.estimator.model_to_estimator(
         keras_model=keras_resnet_model,
