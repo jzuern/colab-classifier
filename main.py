@@ -4,13 +4,12 @@ from __future__ import print_function
 
 import tensorflow as tf
 
-from data.cifar_dataset import maybe_download_and_extract, \
-    load_training_data, load_validation_data
-from model.hyper_parameters import hparams
+from cifar_dataset import load_training_data, load_validation_data
+from hyper_parameters import hparams
 
 # tf.keras imports
 from tensorflow.keras import Model
-from tensorflow.keras.layers import Dense, Conv2D, Activation, MaxPooling2D, Dropout, Flatten
+from tensorflow.keras.layers import Dense, Conv2D, Activation, Flatten
 from tensorflow.keras.layers import BatchNormalization, AveragePooling2D, Input
 
 tf.logging.set_verbosity(tf.logging.DEBUG)
@@ -251,12 +250,8 @@ def main(unused_argv):
     resnet_model = resnet_v2((32, 32, 3), 56)
 
     x_train, y_train = load_training_data()
-    x_val, y_val = load_validation_data()
-
-    x_train = x_train.astype('float32')
-    x_test = x_val.astype('float32')
-    x_train /= 255.0
-    x_test /= 255.0
+    # x_val, y_val = load_validation_data()
+    x_val, y_val = load_training_data()
 
     data_augmentation = False
     batch_size = 64

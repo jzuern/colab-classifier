@@ -2,12 +2,10 @@ import numpy as np
 import pickle
 import os
 import urllib
-from model.hyper_parameters import hparams
+from hyper_parameters import hparams
 import zipfile 
 import tarfile
 from six.moves import urllib
-import tensorflow as tf
-
 
 # URL for the data-set on the internet.
 data_url = "https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz"
