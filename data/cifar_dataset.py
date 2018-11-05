@@ -274,59 +274,59 @@ def eval_input_fn(batch_size=hparams.val_batch_size, buffer_size=10):
     return x, y
 
 
-def predict_input_fn(batch_size=hparams.test_batch_size, buffer_size=10):
-    # Args:
-    # filenames:   Filenames for the TFRecords files.
-    # train:       Boolean whether training (True) or testing (False).
-    # batch_size:  Return batches of this size.
-    # buffer_size: Read buffers of this size. The random shuffling
-    #              is done on the buffer, so it must be big enough.
-
-    tfrecords_filename = hparams.data_dir + 'eval.tfrecords'
-
-    # Create a TensorFlow Dataset-object which has functionality
-    # for reading and shuffling data from TFRecords files.
-    dataset = tf.data.TFRecordDataset(filenames=tfrecords_filename)
-
-    #dataset = dataset.shuffle(buffer_size=buffer_size)
-
-    # Parse the serialized data in the TFRecords files.
-    # This returns TensorFlow tensors for the image and labels.
-
-    dataset = dataset.map(parse_fn)
-
-    # If testing then don't shuffle the data.
-    # Only go through the data once.
-    num_repeat = 1
-
-    # Repeat the dataset the given number of times.
-    dataset = dataset.repeat(num_repeat)
-
-    # Get a batch of data with the given size.
-    dataset = dataset.batch(batch_size)
-
-    # Maximum number of elements that will be buffered
-    # prefetch(n) (where n is the number of elements / batches consumed by a training step)
-
-    prefetch_buffer_size = 10
-
-    dataset = dataset.prefetch(buffer_size=prefetch_buffer_size)
-
-    # Create an iterator for the dataset and the above modifications.
-    iterator = dataset.make_one_shot_iterator()
-
-    # Get the next batch of images and labels.
-    images_batch, labels_batch = iterator.get_next()
-
-    # The input-function must return a dict wrapping the images.
-    res = hparams.image_resolution
-
-    images_batch = tf.reshape(images_batch, [-1, res, res, 3])
-
-    x = {hparams.input_name: images_batch}
-    y = labels_batch
-
-    return x, y
+# def predict_input_fn(batch_size=hparams.test_batch_size, buffer_size=10):
+#     # Args:
+#     # filenames:   Filenames for the TFRecords files.
+#     # train:       Boolean whether training (True) or testing (False).
+#     # batch_size:  Return batches of this size.
+#     # buffer_size: Read buffers of this size. The random shuffling
+#     #              is done on the buffer, so it must be big enough.
+#
+#     tfrecords_filename = hparams.data_dir + 'eval.tfrecords'
+#
+#     # Create a TensorFlow Dataset-object which has functionality
+#     # for reading and shuffling data from TFRecords files.
+#     dataset = tf.data.TFRecordDataset(filenames=tfrecords_filename)
+#
+#     #dataset = dataset.shuffle(buffer_size=buffer_size)
+#
+#     # Parse the serialized data in the TFRecords files.
+#     # This returns TensorFlow tensors for the image and labels.
+#
+#     dataset = dataset.map(parse_fn)
+#
+#     # If testing then don't shuffle the data.
+#     # Only go through the data once.
+#     num_repeat = 1
+#
+#     # Repeat the dataset the given number of times.
+#     dataset = dataset.repeat(num_repeat)
+#
+#     # Get a batch of data with the given size.
+#     dataset = dataset.batch(batch_size)
+#
+#     # Maximum number of elements that will be buffered
+#     # prefetch(n) (where n is the number of elements / batches consumed by a training step)
+#
+#     prefetch_buffer_size = 10
+#
+#     dataset = dataset.prefetch(buffer_size=prefetch_buffer_size)
+#
+#     # Create an iterator for the dataset and the above modifications.
+#     iterator = dataset.make_one_shot_iterator()
+#
+#     # Get the next batch of images and labels.
+#     images_batch, labels_batch = iterator.get_next()
+#
+#     # The input-function must return a dict wrapping the images.
+#     res = hparams.image_resolution
+#
+#     images_batch = tf.reshape(images_batch, [-1, res, res, 3])
+#
+#     x = {hparams.input_name: images_batch}
+#     y = labels_batch
+#
+#     return x, y
 
 
 
@@ -449,23 +449,25 @@ def load_training_data():
         # The begin-index for the next batch is the current end-index.
         begin = end
 
+    return images_batch, cls_batch
+
     # write to tfrecords:
     # open the TFRecords file
-    root = hparams.data_dir
-
-    train_writer = tf.python_io.TFRecordWriter(root + 'train.tfrecords')
-
-    for i in range(_num_images_train):
-
-        label = cls[i]
-        img = images[i, :]
-
-        # Create a feature
-        feature = {'label': _int64_feature(label),
-                   hparams.input_name: _bytes_feature(img.tostring())}
-
-        sample = tf.train.Example(features=tf.train.Features(feature=feature))
-        train_writer.write(sample.SerializeToString())
+    # root = hparams.data_dir
+    #
+    # train_writer = tf.python_io.TFRecordWriter(root + 'train.tfrecords')
+    #
+    # for i in range(_num_images_train):
+    #
+    #     label = cls[i]
+    #     img = images[i, :]
+    #
+    #     # Create a feature
+    #     feature = {'label': _int64_feature(label),
+    #                hparams.input_name: _bytes_feature(img.tostring())}
+    #
+    #     sample = tf.train.Example(features=tf.train.Features(feature=feature))
+    #     train_writer.write(sample.SerializeToString())
 
 
 def load_validation_data():
@@ -477,18 +479,20 @@ def load_validation_data():
 
     images, cls = _load_data(filename="test_batch")
 
-    # write to tfrecords:
-    # open the TFRecords file
-    root = hparams.data_dir
-
-    writer = tf.python_io.TFRecordWriter(root + 'eval.tfrecords')
-
-    for img, cl in zip(images, cls):
-
-        # Create a feature
-        feature = {'label': _int64_feature(cl),
-                   hparams.input_name: _bytes_feature(img.tostring())}
-
-        sample = tf.train.Example(features=tf.train.Features(feature=feature))
-        writer.write(sample.SerializeToString())
+    return images, cls
+    #
+    # # write to tfrecords:
+    # # open the TFRecords file
+    # root = hparams.data_dir
+    #
+    # writer = tf.python_io.TFRecordWriter(root + 'eval.tfrecords')
+    #
+    # for img, cl in zip(images, cls):
+    #
+    #     # Create a feature
+    #     feature = {'label': _int64_feature(cl),
+    #                hparams.input_name: _bytes_feature(img.tostring())}
+    #
+    #     sample = tf.train.Example(features=tf.train.Features(feature=feature))
+    #     writer.write(sample.SerializeToString())
 

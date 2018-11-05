@@ -4,7 +4,7 @@ from __future__ import print_function
 
 import tensorflow as tf
 
-from data.cifar_dataset import train_input_fn, eval_input_fn, predict_input_fn, maybe_download_and_extract, \
+from data.cifar_dataset import train_input_fn, eval_input_fn, maybe_download_and_extract, \
     load_training_data, load_validation_data
 from model.hyper_parameters import hparams
 
