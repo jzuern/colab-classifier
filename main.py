@@ -3,17 +3,17 @@ from __future__ import division
 from __future__ import print_function
 
 import tensorflow as tf
-from data.cifar_dataset import train_input_fn, eval_input_fn, predict_input_fn, maybe_download_and_extract, load_training_data, load_validation_data
-from model.hyper_parameters import params
+
+from data.cifar_dataset import train_input_fn, eval_input_fn, predict_input_fn, maybe_download_and_extract, \
+    load_training_data, load_validation_data
+from model.hyper_parameters import hparams
+
+# tf.keras imports
+from tensorflow.keras import Model
 from tensorflow.keras.layers import Dense, Conv2D, Activation, MaxPooling2D, Dropout, Flatten
-from tensorflow.keras import Sequential
-import argparse
+from tensorflow.keras.layers import BatchNormalization, AveragePooling2D, Input
 
 tf.logging.set_verbosity(tf.logging.DEBUG)
-
-
-from tensorflow.keras.layers import BatchNormalization, AveragePooling2D, Input
-from tensorflow.keras import Model
 
 
 def lr_schedule(epoch):
@@ -174,43 +174,43 @@ def resnet_v2(input_shape, depth, num_classes=10):
     model.summary()
 
     model.compile(loss='sparse_categorical_crossentropy',
-                  optimizer=tf.keras.optimizers.Adam(lr=params["training"]["learning_rate"]),
+                  optimizer=tf.keras.optimizers.Adam(lr=hparams.learning_rate),
                   metrics=['accuracy'])
 
     return model
-
-def cnn_model():
-
-    model = Sequential()
-    model.add(Conv2D(32, (3, 3), padding='same',
-                     input_shape=(32, 32, 3)))
-    model.add(Activation('relu'))
-    model.add(Conv2D(32, (3, 3)))
-    model.add(Activation('relu'))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Dropout(0.25))
-
-    model.add(Conv2D(64, (3, 3), padding='same'))
-    model.add(Activation('relu'))
-    model.add(Conv2D(64, (3, 3)))
-    model.add(Activation('relu'))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Dropout(0.25))
-
-    model.add(Flatten())
-    model.add(Dense(512))
-    model.add(Activation('relu'))
-    model.add(Dropout(0.5))
-    model.add(Dense(10))
-    model.add(Activation('softmax'))
-
-    model.summary()
-
-    model.compile(loss='sparse_categorical_crossentropy',
-                  optimizer=tf.keras.optimizers.Adam(lr=1e-3),
-                  metrics=['acc'])
-
-    return model
+#
+# def cnn_model():
+#
+#     model = Sequential()
+#     model.add(Conv2D(32, (3, 3), padding='same',
+#                      input_shape=(32, 32, 3)))
+#     model.add(Activation('relu'))
+#     model.add(Conv2D(32, (3, 3)))
+#     model.add(Activation('relu'))
+#     model.add(MaxPooling2D(pool_size=(2, 2)))
+#     model.add(Dropout(0.25))
+#
+#     model.add(Conv2D(64, (3, 3), padding='same'))
+#     model.add(Activation('relu'))
+#     model.add(Conv2D(64, (3, 3)))
+#     model.add(Activation('relu'))
+#     model.add(MaxPooling2D(pool_size=(2, 2)))
+#     model.add(Dropout(0.25))
+#
+#     model.add(Flatten())
+#     model.add(Dense(512))
+#     model.add(Activation('relu'))
+#     model.add(Dropout(0.5))
+#     model.add(Dense(10))
+#     model.add(Activation('softmax'))
+#
+#     model.summary()
+#
+#     model.compile(loss='sparse_categorical_crossentropy',
+#                   optimizer=tf.keras.optimizers.Adam(lr=1e-3),
+#                   metrics=['acc'])
+#
+#     return model
 
 def main(unused_argv):
 
@@ -225,18 +225,17 @@ def main(unused_argv):
     run_config = tf.estimator.RunConfig(
         save_checkpoints_secs=10*60)
 
-    # keras_resnet_model = cnn_model()
-    keras_resnet_model = resnet_v2((32, 32, 3), 56)
+    resnet_model = resnet_v2((32, 32, 3), 56)
 
     estimator = tf.keras.estimator.model_to_estimator(
-        keras_model=keras_resnet_model,
-        model_dir=params["paths"]["ckpt_path"],
+        keras_model=resnet_model,
+        model_dir=hparams.checkpoint_dir,
         config=run_config)
 
     # define training and evaluation specs
     train_spec = tf.estimator.TrainSpec(
         input_fn=train_input_fn, 
-        max_steps=params["training"]["train_steps"])
+        max_steps=hparams.n_train_steps)
 
     eval_spec = tf.estimator.EvalSpec(
         input_fn=eval_input_fn,
@@ -250,15 +249,6 @@ def main(unused_argv):
 
 
 if __name__ == "__main__":
-
-    parser = argparse.ArgumentParser()
-    #
-    # parser.add_argument('checkpoint_dir', default="/tmp/checkpoints",
-    #                     help='Directory of the checkpoint')
-    # parser.add_argument('data_dir', default="/tmp/cifar-10-data",
-    #                     help='Directory to save the CIFAR-10 data')
-
-    args = parser.parse_args()
 
     tf.app.run()
 

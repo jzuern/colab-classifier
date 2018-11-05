@@ -1,28 +1,16 @@
-
-
 import numpy as np
 import pickle
 import os
 import urllib
-from model.hyper_parameters import params
+from model.hyper_parameters import hparams
 import zipfile 
 import tarfile
 from six.moves import urllib
 import tensorflow as tf
 
 
-########################################################################
-
-# Directory where you want to download and save the data-set.
-# Set this before you start calling any of the functions below.
-data_path = params["paths"]["data_dir"]
-
 # URL for the data-set on the internet.
 data_url = "https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz"
-
-########################################################################
-# Various constants for the size of the images.
-# Use these constants in your own program.
 
 # Width and height of each image.
 img_size = 32
@@ -31,10 +19,10 @@ img_size = 32
 num_channels = 3
 
 # Length of an image when flattened to a 1-dim array.
-img_size_flat = img_size * img_size * num_channels
+img_size_flat = hparams.image_resolution * hparams.image_resolution * num_channels
 
 # Number of classes.
-num_classes = 10
+num_classes = hparams.n_classes
 
 ########################################################################
 # Various constants used to allocate arrays of the correct size.
@@ -81,7 +69,7 @@ def download(base_url, filename, download_dir):
         print(" Done!")
 
 
-def maybe_download_and_extract(url=data_url, download_dir=data_path):
+def maybe_download_and_extract(url=data_url, download_dir=hparams.data_dir):
     """
     Download and extract the data if it doesn't already exist.
     Assumes the url is a tar-ball file.
@@ -142,7 +130,7 @@ def parse_fn(serialized):
 
     features = \
         {
-            str(params["architecture"]["image_input_name"]): tf.FixedLenFeature([], tf.string),
+            str(hparams.input_name): tf.FixedLenFeature([], tf.string),
             'label': tf.FixedLenFeature([], tf.int64)
         }
 
@@ -151,13 +139,13 @@ def parse_fn(serialized):
                                              features=features)
 
     # Get the image as raw bytes.
-    image_raw = parsed_example[str(params["architecture"]["image_input_name"])]
+    image_raw = parsed_example[hparams.input_name]
 
     # Decode the raw bytes so it becomes a tensor with type.
     image = tf.decode_raw(image_raw, tf.float64)
     # print("parse_fn: image = ", image)
 
-    res = params["architecture"]["image_resolution"]
+    res = hparams.image_resolution
     
     image = tf.reshape(image, [res, res, 3])
 
@@ -172,7 +160,7 @@ def parse_fn(serialized):
 
     return image, label
 
-def train_input_fn(batch_size=params["training"]["train_batch_size"], buffer_size=10000):
+def train_input_fn(batch_size=hparams.train_batch_size, buffer_size=10000):
     # Args:
     # filenames:   Filenames for the TFRecords files.
     # train:       Boolean whether training (True) or testing (False).
@@ -180,7 +168,7 @@ def train_input_fn(batch_size=params["training"]["train_batch_size"], buffer_siz
     # buffer_size: Read buffers of this size. The random shuffling
     #              is done on the buffer, so it must be big enough.
 
-    tfrecords_filename = params["paths"]["data_dir"] + 'train.tfrecords'
+    tfrecords_filename = hparams.data_dir + 'train.tfrecords'
 
     # Create a TensorFlow Dataset-object which has functionality
     # for reading and shuffling data from TFRecords files.
@@ -217,18 +205,17 @@ def train_input_fn(batch_size=params["training"]["train_batch_size"], buffer_siz
     images_batch, labels_batch = iterator.get_next()
 
     # The input-function must return a dict wrapping the images.
-    print("train_input_fn: images_batch = ", images_batch)
-    res = params["architecture"]["image_resolution"]
+    res = hparams.image_resolution
 
     images_batch = tf.reshape(images_batch, [-1, res, res, 3])
 
-    x = {str(params["architecture"]["image_input_name"]): images_batch}
+    x = {hparams.input_name: images_batch}
     y = labels_batch
 
     return x, y
 
 
-def eval_input_fn(batch_size=params["training"]["validation_batch_size"], buffer_size=10):
+def eval_input_fn(batch_size=hparams.val_batch_size, buffer_size=10):
     # Args:
     # filenames:   Filenames for the TFRecords files.
     # train:       Boolean whether training (True) or testing (False).
@@ -236,7 +223,7 @@ def eval_input_fn(batch_size=params["training"]["validation_batch_size"], buffer
     # buffer_size: Read buffers of this size. The random shuffling
     #              is done on the buffer, so it must be big enough.
 
-    tfrecords_filename = params["paths"]["data_dir"] + 'eval.tfrecords'
+    tfrecords_filename = hparams.data_dir + 'eval.tfrecords'
 
     # Create a TensorFlow Dataset-object which has functionality
     # for reading and shuffling data from TFRecords files.
@@ -276,18 +263,18 @@ def eval_input_fn(batch_size=params["training"]["validation_batch_size"], buffer
     images_batch, labels_batch = iterator.get_next()
 
     # The input-function must return a dict wrapping the images.
-    res = params["architecture"]["image_resolution"]
+    res = hparams.image_resolution
 
     images_batch = tf.reshape(images_batch, [-1, res, res, 3])
 
-    x = {str(params["architecture"]["image_input_name"]): images_batch}
+    x = {hparams.input_name: images_batch}
     y = labels_batch
 
 
     return x, y
 
 
-def predict_input_fn(batch_size=params["training"]["test_batch_size"], buffer_size=10):
+def predict_input_fn(batch_size=hparams.test_batch_size, buffer_size=10):
     # Args:
     # filenames:   Filenames for the TFRecords files.
     # train:       Boolean whether training (True) or testing (False).
@@ -295,7 +282,7 @@ def predict_input_fn(batch_size=params["training"]["test_batch_size"], buffer_si
     # buffer_size: Read buffers of this size. The random shuffling
     #              is done on the buffer, so it must be big enough.
 
-    tfrecords_filename = params["paths"]["data_dir"] + 'eval.tfrecords'
+    tfrecords_filename = hparams.data_dir + 'eval.tfrecords'
 
     # Create a TensorFlow Dataset-object which has functionality
     # for reading and shuffling data from TFRecords files.
@@ -332,11 +319,11 @@ def predict_input_fn(batch_size=params["training"]["test_batch_size"], buffer_si
     images_batch, labels_batch = iterator.get_next()
 
     # The input-function must return a dict wrapping the images.
-    res = params["architecture"]["image_resolution"]
+    res = hparams.image_resolution
 
     images_batch = tf.reshape(images_batch, [-1, res, res, 3])
 
-    x = {str(params["architecture"]["image_input_name"]): images_batch}
+    x = {hparams.input_name: images_batch}
     y = labels_batch
 
     return x, y
@@ -352,7 +339,7 @@ def _get_file_path(filename=""):
     If filename=="" then return the directory of the files.
     """
 
-    return os.path.join(data_path, "cifar-10-batches-py/", filename)
+    return os.path.join(hparams.data_dir, "cifar-10-batches-py/", filename)
 
 
 def _unpickle(filename):
@@ -413,19 +400,6 @@ def _load_data(filename):
     # Convert the images.
     images = _convert_images(raw_images)
 
-    #
-    # for image, cl in zip(images, cls):
-    #
-    #     # Create a feature
-    #     feature = {'label': _int64_feature(cl),
-    #            str(params["architecture"]["image_input_name"]): _bytes_feature(image.tostring())}
-    #
-    #     sample = tf.train.Example(features=tf.train.Features(feature=feature))
-    #     writer.write(sample.SerializeToString())
-    #
-    #
-
-
     return images, cls
 
 
@@ -477,7 +451,7 @@ def load_training_data():
 
     # write to tfrecords:
     # open the TFRecords file
-    root = params["paths"]["data_dir"]
+    root = hparams.data_dir
 
     train_writer = tf.python_io.TFRecordWriter(root + 'train.tfrecords')
 
@@ -488,13 +462,10 @@ def load_training_data():
 
         # Create a feature
         feature = {'label': _int64_feature(label),
-                   str(params["architecture"]["image_input_name"]): _bytes_feature(img.tostring())}
+                   hparams.input_name: _bytes_feature(img.tostring())}
 
         sample = tf.train.Example(features=tf.train.Features(feature=feature))
         train_writer.write(sample.SerializeToString())
-
-
-    # return images, cls, one_hot_encoded(class_numbers=cls, num_classes=num_classes)
 
 
 def load_validation_data():
@@ -508,16 +479,16 @@ def load_validation_data():
 
     # write to tfrecords:
     # open the TFRecords file
-    root = params["paths"]["data_dir"]
+    root = hparams.data_dir
 
-    train_writer = tf.python_io.TFRecordWriter(root + 'eval.tfrecords')
+    writer = tf.python_io.TFRecordWriter(root + 'eval.tfrecords')
 
     for img, cl in zip(images, cls):
 
         # Create a feature
         feature = {'label': _int64_feature(cl),
-                   str(params["architecture"]["image_input_name"]): _bytes_feature(img.tostring())}
+                   hparams.input_name: _bytes_feature(img.tostring())}
 
         sample = tf.train.Example(features=tf.train.Features(feature=feature))
-        train_writer.write(sample.SerializeToString())
+        writer.write(sample.SerializeToString())
 

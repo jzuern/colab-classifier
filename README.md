@@ -1,8 +1,3 @@
-### Training of a Resnet50 classifier on CIFAR-10
+# Training of a Resnet classifier on the CIFAR-10 dataset
 
 
-# TODO
-- Implement confusion matrix
-- clean up code
-- add tests
-- add Summaries
